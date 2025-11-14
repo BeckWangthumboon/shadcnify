@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { HexColorPicker } from "react-colorful";
 import {
   Popover,
@@ -8,6 +8,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { debounce } from "@/lib/debounce";
 
 type BaseFieldProps = {
   label: string;
@@ -37,6 +38,17 @@ export function ColorField({
   onChange,
 }: ColorFieldProps) {
   const [pickerOpen, setPickerOpen] = useState(false);
+  const debouncedOnChange = useMemo(() => {
+    if (!onChange) return undefined;
+    const fn = debounce(onChange, 120);
+    return fn;
+  }, [onChange]);
+
+  useEffect(() => {
+    return () => {
+      debouncedOnChange?.cancel();
+    };
+  }, [debouncedOnChange]);
 
   return (
     <div className="flex flex-col gap-2 rounded-lg border p-3">
@@ -55,7 +67,9 @@ export function ColorField({
             <div className="rounded-xl border bg-background p-3 shadow-lg">
               <HexColorPicker
                 color={swatch ?? value}
-                onChange={(color) => onChange?.(color)}
+                onChange={(color) => {
+                  debouncedOnChange?.(color);
+                }}
               />
             </div>
           </PopoverContent>
@@ -63,7 +77,9 @@ export function ColorField({
         <div className="flex-1">
           <Input
             value={value}
-            onChange={(event) => onChange?.(event.target.value)}
+            onChange={(event) =>
+              debouncedOnChange?.(event.target.value)
+            }
             className="uppercase"
             spellCheck={false}
             aria-invalid={Boolean(error)}

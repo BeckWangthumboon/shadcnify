@@ -1,9 +1,10 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { ColorField } from "../controlFields";
 import { useThemeConfig } from "@/providers/themeProvider";
 import { hexToOklch, isHexColor, oklchToHex } from "@/lib/color";
+import { debounce } from "@/lib/debounce";
 import type { ThemeVariable } from "@/lib/theme";
 
 type ColorGroupToken = {
@@ -75,11 +76,20 @@ export function ColorsTab() {
 
   const [values, setValues] = useState<Record<string, string>>(derivedHex);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const debouncers = useRef<Record<string, ReturnType<typeof debounce>>>({});
 
   useEffect(() => {
     setValues(derivedHex);
     setErrors({});
+    Object.values(debouncers.current).forEach((fn) => fn.cancel());
+    debouncers.current = {};
   }, [derivedHex]);
+
+  useEffect(() => {
+    return () => {
+      Object.values(debouncers.current).forEach((fn) => fn.cancel());
+    };
+  }, []);
 
   const handleChange = (tokenId: ThemeVariable, nextValue: string) => {
     const normalized = nextValue.startsWith("#")
@@ -92,17 +102,26 @@ export function ColorsTab() {
 
     if (!isHexColor(normalized)) {
       setErrors((prev) => ({ ...prev, [tokenId]: "Invalid hex color" }));
+      debouncers.current[tokenId]?.cancel();
+      delete debouncers.current[tokenId];
       return;
     }
 
     setErrors((prev) => ({ ...prev, [tokenId]: "" }));
-    const nextOklch = hexToOklch(normalized);
-    if (!nextOklch) return;
 
-    updateTokens(mode, (tokens) => ({
-      ...tokens,
-      [tokenId]: nextOklch,
-    }));
+    if (!debouncers.current[tokenId]) {
+      debouncers.current[tokenId] = debounce((hexValue: string) => {
+        const nextOklch = hexToOklch(hexValue);
+        if (!nextOklch) return;
+
+        updateTokens(mode, (tokens) => ({
+          ...tokens,
+          [tokenId]: nextOklch,
+        }));
+      }, 150);
+    }
+
+    debouncers.current[tokenId](normalized);
   };
 
   return (
