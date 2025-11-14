@@ -7,33 +7,34 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useThemeConfig } from "@/providers/themeProvider";
 import { ColorsTab } from "./tabs/colorsTab";
 import { TypographyTab } from "./tabs/typographyTab";
 import { ShadowsTab } from "./tabs/shadowsTab";
 import { SpacingTab } from "./tabs/spacingTab";
 import { SidebarTab } from "./tabs/sidebarTab";
+import ModeToggle from "./modeToggle";
+import { Undo } from "lucide-react";
 
 export function ManualControlsPanel() {
+  const { mode, setMode } = useThemeConfig();
   return (
     <Card className="flex h-full flex-col">
       <CardHeader className="gap-3">
-        <div className="flex items-center justify-between gap-3">
-          <div>
+        <div className="flex flex-wrap items-start justify-between gap-6">
+          <div className="max-w-full flex-1">
             <CardTitle>Manual Theme Controls</CardTitle>
             <CardDescription>
               Adjust tokens per category. Values are read-only until wiring is
               complete.
             </CardDescription>
           </div>
-          {/* TODO: Add a toggle for light and dark mode and replace with icons*/}
-          <Button variant="outline" size="sm">
-            Light Mode
-          </Button>
-        </div>
-        <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
-          <Button variant="ghost" size="sm">
-            Undo
-          </Button>
+          <div className="flex flex-col items-end gap-3">
+            <ModeToggle mode={mode} onChange={setMode} />
+            <Button variant="ghost" size="icon-sm" className="rounded-full">
+              <Undo className="size-4" />
+            </Button>
+          </div>
         </div>
       </CardHeader>
       <CardContent className="flex-1 overflow-hidden px-0 pb-0">
