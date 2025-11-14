@@ -1,4 +1,3 @@
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -25,9 +24,6 @@ export function ColorField({ label, value }: BaseFieldProps) {
         <Label className="text-xs uppercase text-muted-foreground">{label}</Label>
         <Input value={value} readOnly className="mt-1" />
       </div>
-      <Button variant="ghost" size="sm">
-        Link
-      </Button>
     </div>
   );
 }
