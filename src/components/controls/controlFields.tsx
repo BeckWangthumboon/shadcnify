@@ -1,3 +1,10 @@
+import { useState } from "react";
+import { HexColorPicker } from "react-colorful";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -29,14 +36,30 @@ export function ColorField({
   error,
   onChange,
 }: ColorFieldProps) {
+  const [pickerOpen, setPickerOpen] = useState(false);
+
   return (
     <div className="flex flex-col gap-2 rounded-lg border p-3">
       <Label className="text-xs uppercase text-muted-foreground">{label}</Label>
       <div className="flex items-center gap-4">
-        <div
-          className="h-12 w-12 rounded-md border"
-          style={{ background: swatch ?? value }}
-        />
+        <Popover open={pickerOpen} onOpenChange={setPickerOpen}>
+          <PopoverTrigger asChild>
+            <button
+              type="button"
+              className="h-12 w-12 rounded-md border"
+              style={{ background: swatch ?? value }}
+              aria-label={`Open color picker for ${label}`}
+            />
+          </PopoverTrigger>
+          <PopoverContent className="w-auto border-none bg-transparent p-0 shadow-none">
+            <div className="rounded-xl border bg-background p-3 shadow-lg">
+              <HexColorPicker
+                color={swatch ?? value}
+                onChange={(color) => onChange?.(color)}
+              />
+            </div>
+          </PopoverContent>
+        </Popover>
         <div className="flex-1">
           <Input
             value={value}
@@ -71,14 +94,29 @@ type SliderFieldProps = {
   step?: number;
 };
 
-export function SliderField({ label, value, min = 0, max = 10, step = 0.5 }: SliderFieldProps) {
+export function SliderField({
+  label,
+  value,
+  min = 0,
+  max = 10,
+  step = 0.5,
+}: SliderFieldProps) {
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-between text-sm">
-        <Label className="text-xs uppercase text-muted-foreground">{label}</Label>
+        <Label className="text-xs uppercase text-muted-foreground">
+          {label}
+        </Label>
         <span className="text-muted-foreground">{value}</span>
       </div>
-      <input type="range" min={min} max={max} step={step} defaultValue={min} className="accent-primary h-2 w-full rounded-full bg-muted" />
+      <input
+        type="range"
+        min={min}
+        max={max}
+        step={step}
+        defaultValue={min}
+        className="accent-primary h-2 w-full rounded-full bg-muted"
+      />
     </div>
   );
 }
