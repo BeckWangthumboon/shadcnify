@@ -1,9 +1,6 @@
 import { useState } from "react";
 import { ChatPanel, type ChatMessage } from "@/components/chat/chatPanel";
-import {
-  ManualControlsPanel,
-  type ManualField,
-} from "@/components/controls/controlPanel";
+import { ManualControlsPanel } from "@/components/controls/controlPanel";
 import { PreviewPlayground } from "@/components/playground/previewPlayground";
 
 const mockMessages: ChatMessage[] = [
@@ -29,13 +26,6 @@ const mockMessages: ChatMessage[] = [
     content:
       "Boost the primary saturation slightly and tighten foreground contrast to 8:1.",
   },
-];
-
-const manualFields: ManualField[] = [
-  { id: "background", label: "Background", value: "#ffffff" },
-  { id: "foreground", label: "Foreground", value: "#0f172a" },
-  { id: "primary", label: "Primary", value: "#0f172a" },
-  { id: "radius", label: "Radius", value: "10" },
 ];
 
 export default function App() {
@@ -64,7 +54,7 @@ export default function App() {
             onSubmit={handleSubmit}
           />
 
-          <ManualControlsPanel fields={manualFields} />
+          <ManualControlsPanel />
         </section>
 
         <section>
