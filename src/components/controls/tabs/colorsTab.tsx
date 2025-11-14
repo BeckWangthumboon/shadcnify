@@ -1,125 +1,110 @@
+import { useEffect, useMemo, useState } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { ColorField } from "../controlFields";
+import { useThemeConfig } from "@/providers/themeProvider";
+import { hexToOklch, isHexColor, oklchToHex } from "@/lib/color";
+import type { ThemeVariable } from "@/lib/theme";
 
-const colorGroups = [
+type ColorGroupToken = {
+  id: ThemeVariable;
+  label: string;
+};
+
+const colorGroups: {
+  title: string;
+  tokens: ColorGroupToken[];
+}[] = [
   {
     title: "Interactive",
     tokens: [
-      {
-        id: "primary",
-        label: "Primary",
-        value: "oklch(0.7686 0.1647 70.0804)",
-      },
-      {
-        id: "primary-foreground",
-        label: "Primary Foreground",
-        value: "oklch(0 0 0)",
-      },
-      {
-        id: "secondary",
-        label: "Secondary",
-        value: "oklch(0.9670 0.0029 264.5419)",
-      },
-      {
-        id: "secondary-foreground",
-        label: "Secondary Foreground",
-        value: "oklch(0.4461 0.0263 256.8018)",
-      },
-      { id: "accent", label: "Accent", value: "oklch(0.9869 0.0214 95.2774)" },
-      {
-        id: "accent-foreground",
-        label: "Accent Foreground",
-        value: "oklch(0.4732 0.1247 46.2007)",
-      },
-      {
-        id: "destructive",
-        label: "Destructive",
-        value: "oklch(0.6368 0.2078 25.3313)",
-      },
-      {
-        id: "destructive-foreground",
-        label: "Destructive Foreground",
-        value: "oklch(1.0000 0 0)",
-      },
+      { id: "primary", label: "Primary" },
+      { id: "primary-foreground", label: "Primary Foreground" },
+      { id: "secondary", label: "Secondary" },
+      { id: "secondary-foreground", label: "Secondary Foreground" },
+      { id: "accent", label: "Accent" },
+      { id: "accent-foreground", label: "Accent Foreground" },
+      { id: "destructive", label: "Destructive" },
+      { id: "destructive-foreground", label: "Destructive Foreground" },
     ],
   },
   {
     title: "Base",
     tokens: [
-      { id: "background", label: "Background", value: "oklch(1.0000 0 0)" },
-      { id: "foreground", label: "Foreground", value: "oklch(0.2686 0 0)" },
-      { id: "muted", label: "Muted", value: "oklch(0.9846 0.0017 247.8389)" },
-      {
-        id: "muted-foreground",
-        label: "Muted Foreground",
-        value: "oklch(0.5510 0.0234 264.3637)",
-      },
-      { id: "border", label: "Border", value: "oklch(0.9276 0.0058 264.5313)" },
-      { id: "input", label: "Input", value: "oklch(0.9276 0.0058 264.5313)" },
-      { id: "ring", label: "Ring", value: "oklch(0.7686 0.1647 70.0804)" },
+      { id: "background", label: "Background" },
+      { id: "foreground", label: "Foreground" },
+      { id: "muted", label: "Muted" },
+      { id: "muted-foreground", label: "Muted Foreground" },
+      { id: "border", label: "Border" },
+      { id: "input", label: "Input" },
+      { id: "ring", label: "Ring" },
     ],
   },
   {
     title: "Components",
     tokens: [
-      { id: "card", label: "Card", value: "oklch(1.0000 0 0)" },
-      {
-        id: "card-foreground",
-        label: "Card Foreground",
-        value: "oklch(0.2686 0 0)",
-      },
-      { id: "popover", label: "Popover", value: "oklch(1.0000 0 0)" },
-      {
-        id: "popover-foreground",
-        label: "Popover Foreground",
-        value: "oklch(0.2686 0 0)",
-      },
-      {
-        id: "sidebar",
-        label: "Sidebar",
-        value: "oklch(0.9846 0.0017 247.8389)",
-      },
-      {
-        id: "sidebar-foreground",
-        label: "Sidebar Foreground",
-        value: "oklch(0.2686 0 0)",
-      },
-      {
-        id: "sidebar-primary",
-        label: "Sidebar Primary",
-        value: "oklch(0.7686 0.1647 70.0804)",
-      },
-      {
-        id: "sidebar-primary-foreground",
-        label: "Sidebar Primary Foreground",
-        value: "oklch(1.0000 0 0)",
-      },
-      {
-        id: "sidebar-accent",
-        label: "Sidebar Accent",
-        value: "oklch(0.9869 0.0214 95.2774)",
-      },
-      {
-        id: "sidebar-accent-foreground",
-        label: "Sidebar Accent Foreground",
-        value: "oklch(0.4732 0.1247 46.2007)",
-      },
-      {
-        id: "sidebar-border",
-        label: "Sidebar Border",
-        value: "oklch(0.9276 0.0058 264.5313)",
-      },
-      {
-        id: "sidebar-ring",
-        label: "Sidebar Ring",
-        value: "oklch(0.7686 0.1647 70.0804)",
-      },
+      { id: "card", label: "Card" },
+      { id: "card-foreground", label: "Card Foreground" },
+      { id: "popover", label: "Popover" },
+      { id: "popover-foreground", label: "Popover Foreground" },
+      { id: "sidebar", label: "Sidebar" },
+      { id: "sidebar-foreground", label: "Sidebar Foreground" },
+      { id: "sidebar-primary", label: "Sidebar Primary" },
+      { id: "sidebar-primary-foreground", label: "Sidebar Primary Foreground" },
+      { id: "sidebar-accent", label: "Sidebar Accent" },
+      { id: "sidebar-accent-foreground", label: "Sidebar Accent Foreground" },
+      { id: "sidebar-border", label: "Sidebar Border" },
+      { id: "sidebar-ring", label: "Sidebar Ring" },
     ],
   },
 ];
 
 export function ColorsTab() {
+  const { config, mode, updateTokens } = useThemeConfig();
+  const activeTokens = config[mode];
+
+  const derivedHex = useMemo(() => {
+    const entries: Record<string, string> = {};
+    colorGroups.forEach((group) => {
+      group.tokens.forEach((token) => {
+        entries[token.id] = oklchToHex(activeTokens[token.id]);
+      });
+    });
+    return entries;
+  }, [activeTokens]);
+
+  const [values, setValues] = useState<Record<string, string>>(derivedHex);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    setValues(derivedHex);
+    setErrors({});
+  }, [derivedHex]);
+
+  const handleChange = (tokenId: ThemeVariable, nextValue: string) => {
+    const normalized = nextValue.startsWith("#")
+      ? nextValue
+      : `#${nextValue.replace(/^#/, "")}`;
+    setValues((previous) => ({
+      ...previous,
+      [tokenId]: normalized,
+    }));
+
+    if (!isHexColor(normalized)) {
+      setErrors((prev) => ({ ...prev, [tokenId]: "Invalid hex color" }));
+      return;
+    }
+
+    setErrors((prev) => ({ ...prev, [tokenId]: "" }));
+    const nextOklch = hexToOklch(normalized);
+    if (!nextOklch) return;
+
+    updateTokens(mode, (tokens) => ({
+      ...tokens,
+      [tokenId]: nextOklch,
+    }));
+  };
+
   return (
     <ScrollArea className="h-[420px] px-6">
       <div className="space-y-6 pb-6">
@@ -133,7 +118,14 @@ export function ColorsTab() {
                 <ColorField
                   key={token.id}
                   label={token.label}
-                  value={token.value}
+                  value={values[token.id] ?? derivedHex[token.id]}
+                  swatch={
+                    isHexColor(values[token.id])
+                      ? values[token.id]
+                      : derivedHex[token.id]
+                  }
+                  error={errors[token.id]}
+                  onChange={(value) => handleChange(token.id, value)}
                 />
               ))}
             </div>

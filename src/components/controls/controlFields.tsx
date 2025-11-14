@@ -16,13 +16,39 @@ export function Field({ label, value }: BaseFieldProps) {
   );
 }
 
-export function ColorField({ label, value }: BaseFieldProps) {
+type ColorFieldProps = BaseFieldProps & {
+  onChange?: (value: string) => void;
+  swatch?: string;
+  error?: string;
+};
+
+export function ColorField({
+  label,
+  value,
+  swatch,
+  error,
+  onChange,
+}: ColorFieldProps) {
   return (
-    <div className="flex items-center gap-4 rounded-lg border p-3">
-      <div className="h-12 w-12 rounded-md border" style={{ background: value }} />
-      <div className="flex-1">
-        <Label className="text-xs uppercase text-muted-foreground">{label}</Label>
-        <Input value={value} readOnly className="mt-1" />
+    <div className="flex flex-col gap-2 rounded-lg border p-3">
+      <Label className="text-xs uppercase text-muted-foreground">{label}</Label>
+      <div className="flex items-center gap-4">
+        <div
+          className="h-12 w-12 rounded-md border"
+          style={{ background: swatch ?? value }}
+        />
+        <div className="flex-1">
+          <Input
+            value={value}
+            onChange={(event) => onChange?.(event.target.value)}
+            className="uppercase"
+            spellCheck={false}
+            aria-invalid={Boolean(error)}
+          />
+          {error ? (
+            <p className="text-destructive mt-1 text-xs">{error}</p>
+          ) : null}
+        </div>
       </div>
     </div>
   );
