@@ -1,0 +1,32 @@
+<svg
+  width="64"
+  height="64"
+  viewBox="0 0 64 64"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <!-- Left bracket -->
+  <path
+    d="M18 16 H14 V48 H18"
+    stroke="black"
+    stroke-width="4"
+    stroke-linecap="round"
+  />
+
+  <!-- Right bracket -->
+  <path
+    d="M46 16 H50 V48 H46"
+    stroke="black"
+    stroke-width="4"
+    stroke-linecap="round"
+  />
+
+  <!-- Slider pill -->
+  <rect
+    x="22"
+    y="28"
+    width="20"
+    height="8"
+    rx="4"
+    fill="black"
+  />
+</svg>
