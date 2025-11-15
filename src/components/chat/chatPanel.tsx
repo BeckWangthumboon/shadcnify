@@ -1,4 +1,11 @@
-import { useEffect, useMemo, useState, type FormEvent } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type FormEvent,
+} from "react";
 import { useMutation } from "convex/react";
 import {
   Card,
@@ -15,10 +22,24 @@ import { Separator } from "@/components/ui/separator";
 import { Loader2, Send, Sparkles } from "lucide-react";
 import { Message, MessageContent } from "@/components/ai-elements/message";
 import { Response } from "@/components/ai-elements/response";
+import {
+  Task,
+  TaskContent,
+  TaskItem,
+  TaskItemFile,
+  TaskTrigger,
+} from "@/components/ai-elements/task";
 import { api } from "../../../convex/_generated/api";
 import { useStream } from "@convex-dev/persistent-text-streaming/react";
 import type { StreamId } from "@convex-dev/persistent-text-streaming";
 import { getConvexSiteUrl } from "@/lib/utils";
+import { useThemeConfig } from "@/providers/themeProvider";
+import { hexToHsl, hexToOklch } from "@/lib/color";
+import type { ThemeMode, ThemeTokens, ThemeVariable } from "@/lib/theme";
+import {
+  decodeThemeUpdateMarkerPayload,
+  type ThemeUpdateMarkerPayload,
+} from "@/lib/themeUpdateMarkers";
 
 export type ChatMessage = {
   id: string;
@@ -29,6 +50,12 @@ export type ChatMessage = {
 
 const createId = () => crypto.randomUUID?.() ?? `chat-${Date.now()}`;
 
+type ThemeUpdateSummary = {
+  toolCallId: string;
+  targetMode: ThemeMode;
+  tokens: ThemeVariable[];
+};
+
 export function ChatPanel() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [prompt, setPrompt] = useState("");
@@ -36,6 +63,9 @@ export function ChatPanel() {
   const [activeAssistantId, setActiveAssistantId] = useState<string | null>(
     null,
   );
+  const [themeUpdatesByMessage, setThemeUpdatesByMessage] = useState<
+    Record<string, ThemeUpdateSummary[]>
+  >({});
   const sendMessage = useMutation(api.messages.sendMessage);
   const hasMessages = messages.length > 0;
 
@@ -68,12 +98,12 @@ export function ChatPanel() {
       setMessages((current) =>
         current.map((message) =>
           message.id === assistantMessageId
-            ? { ...message, streamId: responseStreamId as StreamId }
+            ? { ...message, streamId: responseStreamId }
             : message,
         ),
       );
       setActiveAssistantId(assistantMessageId);
-    } catch (error) {
+    } catch {
       setMessages((current) =>
         current.map((message) =>
           message.id === assistantMessageId
@@ -94,6 +124,23 @@ export function ChatPanel() {
     void sendPrompt();
   };
 
+  const handleThemeUpdate = useCallback(
+    (messageId: string, summary: ThemeUpdateSummary) => {
+      setThemeUpdatesByMessage((previous) => {
+        const existing = previous[messageId] ?? [];
+        if (existing.some((item) => item.toolCallId === summary.toolCallId)) {
+          return previous;
+        }
+
+        return {
+          ...previous,
+          [messageId]: [...existing, summary],
+        };
+      });
+    },
+    [],
+  );
+
   return (
     <Card className="flex h-full flex-col">
       <CardHeader>
@@ -112,17 +159,25 @@ export function ChatPanel() {
                   <Message key={message.id} from={message.role}>
                     <MessageContent className="max-w-full">
                       {message.role === "assistant" ? (
-                        <AssistantStreamResponse
-                          driven={activeAssistantId === message.id}
-                          streamId={message.streamId}
-                          fallbackText={message.content}
-                          onFinish={() => {
-                            if (activeAssistantId === message.id) {
-                              setActiveAssistantId(null);
-                              setIsLoading(false);
+                        <>
+                          <AssistantStreamResponse
+                            driven={activeAssistantId === message.id}
+                            streamId={message.streamId}
+                            fallbackText={message.content}
+                            onFinish={() => {
+                              if (activeAssistantId === message.id) {
+                                setActiveAssistantId(null);
+                                setIsLoading(false);
+                              }
+                            }}
+                            onThemeUpdate={(summary) =>
+                              handleThemeUpdate(message.id, summary)
                             }
-                          }}
-                        />
+                          />
+                          <ThemeUpdateTask
+                            updates={themeUpdatesByMessage[message.id] ?? []}
+                          />
+                        </>
                       ) : (
                         <p className="text-sm leading-relaxed text-foreground">
                           {message.content}
@@ -188,6 +243,7 @@ type AssistantStreamResponseProps = {
   driven: boolean;
   fallbackText?: string;
   onFinish?: () => void;
+  onThemeUpdate?: (summary: ThemeUpdateSummary) => void;
 };
 
 function AssistantStreamResponse({
@@ -195,6 +251,7 @@ function AssistantStreamResponse({
   driven,
   fallbackText,
   onFinish,
+  onThemeUpdate,
 }: AssistantStreamResponseProps) {
   const convexSiteUrl = getConvexSiteUrl();
   const streamUrl = useMemo(
@@ -207,6 +264,45 @@ function AssistantStreamResponse({
     driven,
     streamId,
   );
+  const { updateTokens } = useThemeConfig();
+  const appliedToolCallIds = useRef<Set<string>>(new Set());
+
+  useEffect(() => {
+    appliedToolCallIds.current.clear();
+  }, [streamId]);
+
+  const { cleanText, payloads } = useMemo(
+    () => extractThemeUpdatePayloads(text ?? ""),
+    [text],
+  );
+
+  useEffect(() => {
+    payloads.forEach((payload) => {
+      if (appliedToolCallIds.current.has(payload.toolCallId)) {
+        return;
+      }
+
+      const { convertedTokens, tokenNames } = convertThemeTokenUpdates(
+        payload.updates,
+      );
+      if (tokenNames.length === 0) {
+        appliedToolCallIds.current.add(payload.toolCallId);
+        return;
+      }
+
+      updateTokens(payload.targetMode, (tokens) => ({
+        ...tokens,
+        ...convertedTokens,
+      }));
+
+      appliedToolCallIds.current.add(payload.toolCallId);
+      onThemeUpdate?.({
+        toolCallId: payload.toolCallId,
+        targetMode: payload.targetMode,
+        tokens: tokenNames,
+      });
+    });
+  }, [payloads, onThemeUpdate, updateTokens]);
 
   useEffect(() => {
     if (!onFinish) return;
@@ -244,5 +340,125 @@ function AssistantStreamResponse({
     );
   }
 
-  return <Response>{text}</Response>;
+  return <Response>{cleanText}</Response>;
+}
+
+function ThemeUpdateTask({ updates }: { updates: ThemeUpdateSummary[] }) {
+  if (!updates.length) {
+    return null;
+  }
+
+  return (
+    <Task defaultOpen className="mt-3">
+      <TaskTrigger title="Theme tokens updated" />
+      <TaskContent>
+        {updates.map((update) => (
+          <TaskItem key={update.toolCallId}>
+            <p className="text-xs font-medium text-foreground">
+              Applied to {update.targetMode} mode
+            </p>
+            <div className="mt-1 flex flex-wrap gap-1">
+              {update.tokens.map((token) => (
+                <TaskItemFile key={`${update.toolCallId}-${token}`}>
+                  {token}
+                </TaskItemFile>
+              ))}
+            </div>
+          </TaskItem>
+        ))}
+      </TaskContent>
+    </Task>
+  );
+}
+
+const COLOR_TOKEN_IDS: ThemeVariable[] = [
+  "background",
+  "foreground",
+  "card",
+  "card-foreground",
+  "popover",
+  "popover-foreground",
+  "primary",
+  "primary-foreground",
+  "secondary",
+  "secondary-foreground",
+  "muted",
+  "muted-foreground",
+  "accent",
+  "accent-foreground",
+  "destructive",
+  "destructive-foreground",
+  "border",
+  "input",
+  "ring",
+  "chart-1",
+  "chart-2",
+  "chart-3",
+  "chart-4",
+  "chart-5",
+  "sidebar",
+  "sidebar-foreground",
+  "sidebar-primary",
+  "sidebar-primary-foreground",
+  "sidebar-accent",
+  "sidebar-accent-foreground",
+  "sidebar-border",
+  "sidebar-ring",
+];
+
+const COLOR_TOKEN_SET = new Set<ThemeVariable>(COLOR_TOKEN_IDS);
+
+function extractThemeUpdatePayloads(text: string): {
+  cleanText: string;
+  payloads: ThemeUpdateMarkerPayload[];
+} {
+  if (!text) {
+    return { cleanText: "", payloads: [] };
+  }
+
+  const payloads: ThemeUpdateMarkerPayload[] = [];
+  const regex = /\[\[THEME_UPDATE::([A-Za-z0-9+/=]+)]]/g;
+  const cleanText = text.replace(regex, (_match, encoded: string) => {
+    const payload = decodeThemeUpdateMarkerPayload(encoded);
+    if (payload) {
+      payloads.push(payload);
+    }
+    return "";
+  });
+
+  return { cleanText, payloads };
+}
+
+function convertThemeTokenUpdates(
+  updates: ThemeUpdateMarkerPayload["updates"],
+): {
+  convertedTokens: Partial<ThemeTokens>;
+  tokenNames: ThemeVariable[];
+} {
+  const convertedTokens: Partial<ThemeTokens> = {};
+  const tokenNames: ThemeVariable[] = [];
+
+  Object.entries(updates).forEach(([tokenId, value]) => {
+    if (!value) return;
+    const id = tokenId as ThemeVariable;
+    const convertedValue = convertSingleTokenValue(id, value);
+    if (!convertedValue) return;
+
+    convertedTokens[id] = convertedValue;
+    tokenNames.push(id);
+  });
+
+  return { convertedTokens, tokenNames };
+}
+
+function convertSingleTokenValue(tokenId: ThemeVariable, value: string) {
+  if (COLOR_TOKEN_SET.has(tokenId)) {
+    return hexToOklch(value.trim()) ?? null;
+  }
+
+  if (tokenId === "shadow-color") {
+    return hexToHsl(value.trim());
+  }
+
+  return value;
 }

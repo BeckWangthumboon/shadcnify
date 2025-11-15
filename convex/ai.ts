@@ -7,6 +7,12 @@ import { GenericActionCtx } from "convex/server";
 import { DataModel } from "./_generated/dataModel";
 import { api } from "./_generated/api";
 import { updateThemeTokensTool } from "./lib/theme";
+import {
+  THEME_UPDATE_MARKER_PREFIX,
+  THEME_UPDATE_MARKER_SUFFIX,
+  encodeThemeUpdateMarkerPayload,
+  type ThemeUpdateMarkerPayload,
+} from "../src/lib/themeUpdateMarkers";
 
 const OPENROUTER_MODEL = "z-ai/glm-4.5-air:free";
 
@@ -75,9 +81,29 @@ export const streamChatHandler = async (
         },
       });
 
-      for await (const delta of result.textStream) {
-        if (delta.length === 0) continue;
-        await append(delta);
+      for await (const part of result.fullStream) {
+        if (part.type === "text-delta") {
+          if (part.text.length === 0) continue;
+          await append(part.text);
+          continue;
+        }
+
+        if (
+          part.type === "tool-call" &&
+          part.toolName === "updateThemeTokens"
+        ) {
+          const { targetMode, updates } =
+            part.input as ThemeUpdateMarkerPayload;
+          const markerPayload: ThemeUpdateMarkerPayload = {
+            toolCallId: part.toolCallId,
+            targetMode,
+            updates,
+          };
+          const encoded = encodeThemeUpdateMarkerPayload(markerPayload);
+          await append(
+            `${THEME_UPDATE_MARKER_PREFIX}${encoded}${THEME_UPDATE_MARKER_SUFFIX}`,
+          );
+        }
       }
 
       await result.response;
