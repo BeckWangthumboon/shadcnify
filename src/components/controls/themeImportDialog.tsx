@@ -13,12 +13,12 @@ import { Textarea } from "@/components/ui/textarea";
 import {
   defaultThemeConfig,
   themeVariableKeys,
-  type ThemeConfig,
   type ThemeTokens,
   type ThemeVariable,
 } from "@/lib/theme";
 import { useThemeConfig } from "@/providers/themeProvider";
 import { cn } from "@/lib/utils";
+import { z } from "zod";
 
 type ButtonProps = ComponentProps<typeof Button>;
 type ThemeImportDialogProps = {
@@ -38,9 +38,40 @@ const themeVariableSet = new Set(themeVariableKeys);
 const isThemeVariable = (value: string): value is ThemeVariable =>
   themeVariableSet.has(value as ThemeVariable);
 
+const tokenValueSchema = z
+  .string()
+  .trim()
+  .min(1, "Token values cannot be empty.");
+
+const tokenShape = themeVariableKeys.reduce(
+  (shape, key) => {
+    shape[key] = tokenValueSchema;
+    return shape;
+  },
+  {} as Record<ThemeVariable, typeof tokenValueSchema>,
+);
+
+const themeTokensValidator = z.object(tokenShape).partial();
+
+const validateTokens = (
+  tokens: Partial<ThemeTokens>,
+): { tokens: Partial<ThemeTokens> } | { error: string } => {
+  const parsed = themeTokensValidator.safeParse(tokens);
+  if (!parsed.success) {
+    const issue = parsed.error.issues[0];
+    const tokenName =
+      (issue?.path?.[0] as string | undefined) ?? "token value";
+    return {
+      error: issue?.message ?? `Invalid ${tokenName}.`,
+    };
+  }
+  return { tokens: parsed.data };
+};
+
 const parseTokensFromBlock = (block?: string) => {
   const result: Partial<ThemeTokens> = {};
   if (!block) return result;
+  tokenPattern.lastIndex = 0;
   let match: RegExpExecArray | null;
   while ((match = tokenPattern.exec(block)) !== null) {
     const [, rawKey, rawValue] = match;
@@ -72,14 +103,19 @@ const parseThemeSnippet = (input: string): ParseResult => {
     };
   }
 
+  const validatedLight = validateTokens(lightTokens);
+  if ("error" in validatedLight) return validatedLight;
+  const validatedDark = validateTokens(darkTokens);
+  if ("error" in validatedDark) return validatedDark;
+
   return {
     light: {
       ...defaultThemeConfig.light,
-      ...lightTokens,
+      ...validatedLight.tokens,
     },
     dark: {
       ...defaultThemeConfig.dark,
-      ...(!Object.keys(darkTokens).length ? {} : darkTokens),
+      ...validatedDark.tokens,
     },
   };
 };
@@ -148,7 +184,6 @@ export function ThemeImportDialog({
   ...
 }"
             className="font-mono text-sm max-h-96 resize-none"
-            style={{ minHeight: "400px" }}
           />
           {error ? (
             <p className="text-sm text-destructive">{error}</p>

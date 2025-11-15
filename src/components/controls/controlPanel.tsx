@@ -40,8 +40,16 @@ export function ManualControlsPanel() {
           <Button variant="secondary" size="sm" onClick={resetConfig}>
             Reset
           </Button>
-          <ThemeExportDialog variant="secondary" size="sm" triggerLabel="Export" />
-          <ThemeImportDialog variant="secondary" size="sm" triggerLabel="Import" />
+          <ThemeExportDialog
+            variant="secondary"
+            size="sm"
+            triggerLabel="Export"
+          />
+          <ThemeImportDialog
+            variant="secondary"
+            size="sm"
+            triggerLabel="Import"
+          />
         </div>
       </CardHeader>
       <CardContent className="flex-1 overflow-hidden px-0 pb-0">
