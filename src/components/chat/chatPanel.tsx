@@ -12,7 +12,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { Loader2, Sparkles } from "lucide-react";
+import { Loader2, Send, Sparkles } from "lucide-react";
 import { Message, MessageContent } from "@/components/ai-elements/message";
 import { Response } from "@/components/ai-elements/response";
 import { api } from "../../../convex/_generated/api";
@@ -39,12 +39,10 @@ export function ChatPanel() {
   const sendMessage = useMutation(api.messages.sendMessage);
   const hasMessages = messages.length > 0;
 
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+  const sendPrompt = async () => {
     const trimmedPrompt = prompt.trim();
     if (!trimmedPrompt || isLoading) return;
 
-    console.log("[chat] submitting prompt", trimmedPrompt);
     const newMessage: ChatMessage = {
       id: createId(),
       role: "user",
@@ -67,7 +65,6 @@ export function ChatPanel() {
         prompt: trimmedPrompt,
       });
 
-      console.log("[chat] got stream id", responseStreamId);
       setMessages((current) =>
         current.map((message) =>
           message.id === assistantMessageId
@@ -77,7 +74,6 @@ export function ChatPanel() {
       );
       setActiveAssistantId(assistantMessageId);
     } catch (error) {
-      console.error("Chat request failed", error);
       setMessages((current) =>
         current.map((message) =>
           message.id === assistantMessageId
@@ -93,8 +89,13 @@ export function ChatPanel() {
     }
   };
 
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    void sendPrompt();
+  };
+
   return (
-    <Card>
+    <Card className="flex h-full flex-col">
       <CardHeader>
         <CardTitle>AI Theme Chat</CardTitle>
         <CardDescription>
@@ -102,69 +103,78 @@ export function ChatPanel() {
           Responses are mocked for now.
         </CardDescription>
       </CardHeader>
-      <CardContent>
-        <ScrollArea className="h-72 pr-4">
-          {hasMessages ? (
-            <div className="flex flex-col gap-6">
-              {messages.map((message) => (
-                <Message key={message.id} from={message.role}>
-                  <MessageContent className="max-w-full">
-                    {message.role === "assistant" ? (
-                      <AssistantStreamResponse
-                        driven={activeAssistantId === message.id}
-                        streamId={message.streamId}
-                        fallbackText={message.content}
-                        onFinish={() => {
-                          if (activeAssistantId === message.id) {
-                            setActiveAssistantId(null);
-                            setIsLoading(false);
-                          }
-                        }}
-                      />
-                    ) : (
-                      <p className="text-sm leading-relaxed text-foreground">
-                        {message.content}
-                      </p>
-                    )}
-                  </MessageContent>
-                </Message>
-              ))}
-            </div>
-          ) : (
-            <div className="flex h-60 flex-col items-center justify-center text-center text-sm text-muted-foreground">
-              <Sparkles className="mb-2 size-5 text-primary" />
-              <p>
-                Describe the mood, palette, or spacing tweaks you are after.
-              </p>
-              <p>Responses will render with the AI Elements layout.</p>
-            </div>
-          )}
-        </ScrollArea>
+      <CardContent className="flex flex-1 min-h-0 flex-col gap-4 overflow-hidden max-h-[22rem]">
+        <div className="flex-1 h-full">
+          <ScrollArea className="h-full pr-4">
+            {hasMessages ? (
+              <div className="flex flex-col gap-6 pb-4">
+                {messages.map((message) => (
+                  <Message key={message.id} from={message.role}>
+                    <MessageContent className="max-w-full">
+                      {message.role === "assistant" ? (
+                        <AssistantStreamResponse
+                          driven={activeAssistantId === message.id}
+                          streamId={message.streamId}
+                          fallbackText={message.content}
+                          onFinish={() => {
+                            if (activeAssistantId === message.id) {
+                              setActiveAssistantId(null);
+                              setIsLoading(false);
+                            }
+                          }}
+                        />
+                      ) : (
+                        <p className="text-sm leading-relaxed text-foreground">
+                          {message.content}
+                        </p>
+                      )}
+                    </MessageContent>
+                  </Message>
+                ))}
+              </div>
+            ) : (
+              <div className="flex h-60 flex-col items-center justify-center text-center text-sm text-muted-foreground">
+                <Sparkles className="mb-2 size-5 text-primary" />
+                <p>
+                  Describe the mood, palette, or spacing tweaks you are after.
+                </p>
+                <p>Responses will render with the AI Elements layout.</p>
+              </div>
+            )}
+          </ScrollArea>
+        </div>
       </CardContent>
       <Separator className="mt-2" />
       <CardFooter>
         <form
           onSubmit={handleSubmit}
-          className="flex w-full flex-col gap-3 sm:flex-row"
+          className="flex w-full flex-col gap-3 sm:flex-row sm:items-start"
         >
           <Textarea
             value={prompt}
             onChange={(event) => setPrompt(event.target.value)}
             placeholder="Describe the vibe you're going for..."
-            className="min-h-12 flex-1"
+            className="min-h-24 max-h-48 flex-1 resize-none overflow-y-auto"
+            onKeyDown={(event) => {
+              if (event.key === "Enter" && !event.shiftKey) {
+                event.preventDefault();
+                void sendPrompt();
+              }
+            }}
           />
           <Button
             type="submit"
-            className="sm:w-40"
             disabled={isLoading || !prompt.trim()}
+            size="icon"
+            className="self-start"
           >
             {isLoading ? (
-              <>
-                <Loader2 className="animate-spin" />
-                Thinking...
-              </>
+              <Loader2 className="animate-spin" />
             ) : (
-              "Suggest tweaks"
+              <>
+                <Send className="size-4" />
+                <span className="sr-only">Send message</span>
+              </>
             )}
           </Button>
         </form>
