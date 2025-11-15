@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState, type ComponentProps } from "react";
+import { useCallback, useEffect, useState, type ComponentProps, type ReactNode } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -18,11 +18,14 @@ import {
 } from "@/lib/theme";
 import { useThemeConfig } from "@/providers/themeProvider";
 import { cn } from "@/lib/utils";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { z } from "zod";
 
 type ButtonProps = ComponentProps<typeof Button>;
 type ThemeImportDialogProps = {
   triggerLabel?: string;
+  triggerIcon?: ReactNode;
+  tooltip?: string;
 } & Pick<ButtonProps, "className" | "size" | "variant">;
 
 type ParseSuccess = {
@@ -125,6 +128,8 @@ export function ThemeImportDialog({
   size = "sm",
   variant = "ghost",
   triggerLabel = "Import",
+  triggerIcon,
+  tooltip,
 }: ThemeImportDialogProps) {
   const { updateTokens } = useThemeConfig();
   const [open, setOpen] = useState(false);
@@ -148,13 +153,32 @@ export function ThemeImportDialog({
     setOpen(false);
   }, [themeText, updateTokens]);
 
+  const triggerText = triggerLabel || tooltip || "Import theme";
+  const buttonBody = (
+    <Button variant={variant} size={size} className={cn("gap-2", className)}>
+      {triggerIcon}
+      {triggerLabel ? (
+        triggerLabel
+      ) : (
+        <span className="sr-only">{triggerText}</span>
+      )}
+    </Button>
+  );
+
+  const trigger = tooltip ? (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <DialogTrigger asChild>{buttonBody}</DialogTrigger>
+      </TooltipTrigger>
+      <TooltipContent>{tooltip}</TooltipContent>
+    </Tooltip>
+  ) : (
+    <DialogTrigger asChild>{buttonBody}</DialogTrigger>
+  );
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button variant={variant} size={size} className={cn(className)}>
-          {triggerLabel}
-        </Button>
-      </DialogTrigger>
+      {trigger}
       <DialogContent className="sm:max-w-2xl">
         <DialogHeader>
           <DialogTitle>Import theme</DialogTitle>

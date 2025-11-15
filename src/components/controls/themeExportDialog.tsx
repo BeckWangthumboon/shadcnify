@@ -4,6 +4,7 @@ import {
   useMemo,
   useState,
   type ComponentProps,
+  type ReactNode,
 } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -14,6 +15,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { themeVariableKeys, type ThemeTokens } from "@/lib/theme";
 import { useThemeConfig } from "@/providers/themeProvider";
 import { cn } from "@/lib/utils";
@@ -22,6 +24,8 @@ import { CheckIcon, CopyIcon } from "lucide-react";
 type ButtonProps = ComponentProps<typeof Button>;
 type ThemeExportDialogProps = {
   triggerLabel?: string;
+  triggerIcon?: ReactNode;
+  tooltip?: string;
 } & Pick<ButtonProps, "className" | "size" | "variant">;
 
 export function ThemeExportDialog({
@@ -29,6 +33,8 @@ export function ThemeExportDialog({
   size = "sm",
   variant = "ghost",
   triggerLabel = "Export",
+  triggerIcon,
+  tooltip,
 }: ThemeExportDialogProps) {
   const { config } = useThemeConfig();
   const [copied, setCopied] = useState(false);
@@ -57,13 +63,32 @@ export function ThemeExportDialog({
     return () => window.clearTimeout(timeout);
   }, [copied]);
 
+  const triggerText = triggerLabel || tooltip || "Export theme";
+  const buttonBody = (
+    <Button variant={variant} size={size} className={cn("gap-2", className)}>
+      {triggerIcon}
+      {triggerLabel ? (
+        triggerLabel
+      ) : (
+        <span className="sr-only">{triggerText}</span>
+      )}
+    </Button>
+  );
+
+  const trigger = tooltip ? (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <DialogTrigger asChild>{buttonBody}</DialogTrigger>
+      </TooltipTrigger>
+      <TooltipContent>{tooltip}</TooltipContent>
+    </Tooltip>
+  ) : (
+    <DialogTrigger asChild>{buttonBody}</DialogTrigger>
+  );
+
   return (
     <Dialog>
-      <DialogTrigger asChild>
-        <Button variant={variant} size={size} className={cn(className)}>
-          {triggerLabel}
-        </Button>
-      </DialogTrigger>
+      {trigger}
       <DialogContent className="sm:max-w-2xl">
         <DialogHeader>
           <DialogTitle>Export theme</DialogTitle>

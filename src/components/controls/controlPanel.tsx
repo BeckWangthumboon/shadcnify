@@ -1,6 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useMemo } from "react";
 import { useThemeConfig } from "@/providers/themeProvider";
 import { ColorsTab } from "./tabs/colorsTab";
@@ -12,6 +13,7 @@ import ModeToggle from "./modeToggle";
 import { convertTokensForMode } from "@/lib/conversion";
 import { ThemeExportDialog } from "./themeExportDialog";
 import { ThemeImportDialog } from "./themeImportDialog";
+import { RefreshCw, RotateCcw, Upload, Download } from "lucide-react";
 
 export function ManualControlsPanel() {
   const { mode, setMode, resetConfig, updateTokens } = useThemeConfig();
@@ -34,21 +36,49 @@ export function ManualControlsPanel() {
           <ModeToggle mode={mode} onChange={setMode} />
         </div>
         <div className="flex flex-wrap gap-2">
-          <Button variant="secondary" size="sm" onClick={handleConvert}>
-            {convertLabel}
-          </Button>
-          <Button variant="secondary" size="sm" onClick={resetConfig}>
-            Reset
-          </Button>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="secondary"
+                size="icon-sm"
+                onClick={handleConvert}
+                className="rounded-full"
+              >
+                <RefreshCw className="size-4" />
+                <span className="sr-only">{convertLabel}</span>
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>{convertLabel}</TooltipContent>
+          </Tooltip>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="secondary"
+                size="icon-sm"
+                onClick={resetConfig}
+                className="rounded-full"
+              >
+                <RotateCcw className="size-4" />
+                <span className="sr-only">Reset theme</span>
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Reset theme</TooltipContent>
+          </Tooltip>
           <ThemeExportDialog
             variant="secondary"
-            size="sm"
-            triggerLabel="Export"
+            size="icon-sm"
+            triggerLabel=""
+            className="rounded-full"
+            triggerIcon={<Upload className="size-4" />}
+            tooltip="Export theme"
           />
           <ThemeImportDialog
             variant="secondary"
-            size="sm"
-            triggerLabel="Import"
+            size="icon-sm"
+            triggerLabel=""
+            className="rounded-full"
+            triggerIcon={<Download className="size-4" />}
+            tooltip="Import theme"
           />
         </div>
       </CardHeader>
