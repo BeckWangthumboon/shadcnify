@@ -11,6 +11,7 @@ import { ChartsTab } from "./tabs/chartsTab";
 import ModeToggle from "./modeToggle";
 import { convertTokensForMode } from "@/lib/conversion";
 import { ThemeExportDialog } from "./themeExportDialog";
+import { ThemeImportDialog } from "./themeImportDialog";
 
 export function ManualControlsPanel() {
   const { mode, setMode, resetConfig, updateTokens } = useThemeConfig();
@@ -40,6 +41,7 @@ export function ManualControlsPanel() {
             Reset
           </Button>
           <ThemeExportDialog variant="secondary" size="sm" triggerLabel="Export" />
+          <ThemeImportDialog variant="secondary" size="sm" triggerLabel="Import" />
         </div>
       </CardHeader>
       <CardContent className="flex-1 overflow-hidden px-0 pb-0">
