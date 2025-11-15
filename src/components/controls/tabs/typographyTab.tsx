@@ -152,7 +152,12 @@ export function TypographyTab() {
                     <SelectContent>
                       {group.options.map((option) => (
                         <SelectItem key={option.name} value={option.name}>
-                          {option.name}
+                          <span
+                            className="text-sm"
+                            style={{ fontFamily: option.stack }}
+                          >
+                            {option.name}
+                          </span>
                         </SelectItem>
                       ))}
                     </SelectContent>
