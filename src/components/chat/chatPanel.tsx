@@ -35,7 +35,12 @@ import type { StreamId } from "@convex-dev/persistent-text-streaming";
 import { getConvexSiteUrl } from "@/lib/utils";
 import { useThemeConfig } from "@/providers/themeProvider";
 import { hexToHsl, hexToOklch } from "@/lib/color";
-import type { ThemeMode, ThemeTokens, ThemeVariable } from "@/lib/theme";
+import type {
+  ThemeConfig,
+  ThemeMode,
+  ThemeTokens,
+  ThemeVariable,
+} from "@/lib/theme";
 import {
   decodeThemeUpdateMarkerPayload,
   type ThemeUpdateMarkerPayload,
@@ -68,6 +73,7 @@ export function ChatPanel() {
   >({});
   const sendMessage = useMutation(api.messages.sendMessage);
   const hasMessages = messages.length > 0;
+  const { config } = useThemeConfig();
 
   const sendPrompt = async () => {
     const trimmedPrompt = prompt.trim();
@@ -91,8 +97,17 @@ export function ChatPanel() {
     setIsLoading(true);
 
     try {
+      const themeSnapshot = formatThemeSnapshot(config);
+      const structuredPrompt = [
+        "Current theme snapshot (JSON):",
+        themeSnapshot,
+        "",
+        "User prompt:",
+        trimmedPrompt,
+      ].join("\n");
+
       const { responseStreamId } = await sendMessage({
-        prompt: trimmedPrompt,
+        prompt: structuredPrompt,
       });
 
       setMessages((current) =>
@@ -461,4 +476,17 @@ function convertSingleTokenValue(tokenId: ThemeVariable, value: string) {
   }
 
   return value;
+}
+
+function formatThemeSnapshot(config: ThemeConfig) {
+  const light = JSON.stringify(config.light, null, 2);
+  const dark = JSON.stringify(config.dark, null, 2);
+
+  return [
+    "Light mode tokens:",
+    light,
+    "",
+    "Dark mode tokens:",
+    dark,
+  ].join("\n");
 }
