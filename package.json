@@ -13,7 +13,9 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@ai-sdk/openai": "^2.0.67",
     "@convex-dev/auth": "^0.0.90",
+    "@convex-dev/persistent-text-streaming": "^0.3.0",
     "@fontsource/bitter": "^5.2.10",
     "@fontsource/cascadia-code": "^5.2.3",
     "@fontsource/cormorant-garamond": "^5.2.11",
@@ -67,6 +69,7 @@
     "@radix-ui/react-switch": "^1.2.6",
     "@radix-ui/react-tabs": "^1.1.13",
     "@radix-ui/react-tooltip": "^1.2.8",
+    "ai": "^5.0.93",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "colorjs.io": "^0.5.2",
