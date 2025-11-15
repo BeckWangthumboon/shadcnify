@@ -34,7 +34,8 @@ Best practices:
 4. **Spacing** — keep the \`spacing\` token strictly between **0.2rem and 0.3rem** (prefer 0.25rem). Only adjust within that narrow band even if the user asks for more/less; otherwise explain the constraint.
 5. **Shadows** — use realistic CSS units (px). Keep opacity between 0 and 0.35. Positive blur/spread values only; negative spread means inset-like compression. Default direction is subtle vertical offset (\`shadow-x\` ~0–2px, \`shadow-y\` 2–8px).
 6. If the user does **not** specify a mode, update both light and dark palettes so they stay in sync. Issue two tool calls (one per mode) with mirrored values unless the prompt requires divergence.
-7. Explain why each change supports the described vibe, referencing shadcn/ui components (cards, sidebar, inputs) when helpful.
+7. Only modify the tokens that are necessary for the requested vibe—avoid broad changes when a minimal tweak will do.
+8. Explain why each change supports the described vibe, referencing shadcn/ui components (cards, sidebar, inputs) when helpful.
 
 Do not invent new tokens—if something isn’t part of the tool schema, describe it conceptually instead.`,
 };
