@@ -101,38 +101,3 @@ export function TextareaField({ label, value }: BaseFieldProps) {
     </div>
   );
 }
-
-type SliderFieldProps = {
-  label: string;
-  value: string;
-  min?: number;
-  max?: number;
-  step?: number;
-};
-
-export function SliderField({
-  label,
-  value,
-  min = 0,
-  max = 10,
-  step = 0.5,
-}: SliderFieldProps) {
-  return (
-    <div className="space-y-2">
-      <div className="flex items-center justify-between text-sm">
-        <Label className="text-xs uppercase text-muted-foreground">
-          {label}
-        </Label>
-        <span className="text-muted-foreground">{value}</span>
-      </div>
-      <input
-        type="range"
-        min={min}
-        max={max}
-        step={step}
-        defaultValue={min}
-        className="accent-primary h-2 w-full rounded-full bg-muted"
-      />
-    </div>
-  );
-}
