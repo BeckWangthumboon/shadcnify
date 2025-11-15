@@ -6,6 +6,7 @@ import { createOpenRouter } from "@openrouter/ai-sdk-provider";
 import { GenericActionCtx } from "convex/server";
 import { DataModel } from "./_generated/dataModel";
 import { api } from "./_generated/api";
+import { updateThemeTokensTool } from "./lib/theme";
 
 const OPENROUTER_MODEL = "z-ai/glm-4.5-air:free";
 
@@ -69,6 +70,9 @@ export const streamChatHandler = async (
             content: messageRecord.prompt,
           },
         ],
+        tools: {
+          updateThemeTokens: updateThemeTokensTool,
+        },
       });
 
       for await (const delta of result.textStream) {

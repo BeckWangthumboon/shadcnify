@@ -10,6 +10,7 @@
 
 import type * as ai from "../ai.js";
 import type * as http from "../http.js";
+import type * as lib_theme from "../lib/theme.js";
 import type * as messages from "../messages.js";
 import type * as streaming from "../streaming.js";
 
@@ -22,6 +23,7 @@ import type {
 declare const fullApi: ApiFromModules<{
   ai: typeof ai;
   http: typeof http;
+  "lib/theme": typeof lib_theme;
   messages: typeof messages;
   streaming: typeof streaming;
 }>;
