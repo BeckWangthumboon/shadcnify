@@ -16,14 +16,16 @@ import { ThemeImportDialog } from "./themeImportDialog";
 import { RefreshCw, RotateCcw, Upload, Download } from "lucide-react";
 
 export function ManualControlsPanel() {
-  const { mode, setMode, resetConfig, updateTokens } = useThemeConfig();
+  const { config, mode, setMode, resetConfig, updateTokens } =
+    useThemeConfig();
   const convertTarget = useMemo(
     () => (mode === "light" ? "dark" : "light"),
     [mode],
   );
 
   const handleConvert = () => {
-    updateTokens(mode, (tokens) => convertTokensForMode(tokens, convertTarget));
+    const converted = convertTokensForMode(config[mode], convertTarget);
+    updateTokens(convertTarget, () => converted);
     setMode(convertTarget);
   };
   const convertLabel =
