@@ -1,10 +1,4 @@
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useMemo } from "react";
@@ -33,35 +27,17 @@ export function ManualControlsPanel() {
   return (
     <Card className="flex h-full flex-col">
       <CardHeader className="gap-3">
-        <div className="flex flex-wrap items-start justify-between gap-6">
-          <div className="max-w-full flex-1">
-            <CardTitle>Manual Theme Controls</CardTitle>
-            <CardDescription>
-              Adjust tokens per category. Values are read-only until wiring is
-              complete.
-            </CardDescription>
-          </div>
-          <div className="flex flex-col items-end gap-3">
-            <ModeToggle mode={mode} onChange={setMode} />
-            <div className="flex gap-2">
-              <Button
-                variant="ghost"
-                size="sm"
-                className="rounded-full px-4"
-                onClick={handleConvert}
-              >
-                {convertLabel}
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="rounded-full px-4"
-                onClick={resetConfig}
-              >
-                Reset
-              </Button>
-            </div>
-          </div>
+        <div className="flex flex-row items-center justify-between">
+          <CardTitle>Manual Theme Controls</CardTitle>
+          <ModeToggle mode={mode} onChange={setMode} />
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <Button variant="secondary" size="sm" onClick={handleConvert}>
+            {convertLabel}
+          </Button>
+          <Button variant="secondary" size="sm" onClick={resetConfig}>
+            Reset
+          </Button>
         </div>
       </CardHeader>
       <CardContent className="flex-1 overflow-hidden px-0 pb-0">
