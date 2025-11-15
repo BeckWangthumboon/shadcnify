@@ -50,7 +50,7 @@ function resolveSelectedValue(
 }
 
 export function TypographyTab() {
-  const { config, mode, updateTokens } = useThemeConfig();
+  const { config, mode, syncTokenAcrossModes } = useThemeConfig();
   const activeTokens = config[mode];
   const [trackingValue, setTrackingValue] = useState(() => {
     const parsed = Number.parseFloat(activeTokens["tracking-normal"]);
@@ -58,13 +58,10 @@ export function TypographyTab() {
   });
   const debouncedTrackingUpdate = useMemo(() => {
     const fn = debounce((value: number) => {
-      updateTokens(mode, (tokens) => ({
-        ...tokens,
-        "tracking-normal": `${value}em`,
-      }));
+      syncTokenAcrossModes("tracking-normal", `${value}em`);
     }, 150);
     return fn;
-  }, [mode, updateTokens]);
+  }, [syncTokenAcrossModes]);
 
   useEffect(() => {
     return () => {
@@ -86,10 +83,7 @@ export function TypographyTab() {
     );
     if (!selectedOption) return;
 
-    updateTokens(mode, (tokens) => ({
-      ...tokens,
-      [tokenId]: selectedOption.stack,
-    }));
+    syncTokenAcrossModes(tokenId, selectedOption.stack);
   };
 
   const handleTrackingChange = (nextValue: number) => {

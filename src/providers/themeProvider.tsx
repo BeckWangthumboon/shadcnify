@@ -1,4 +1,11 @@
-import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import type { ReactNode } from "react";
 import {
   type ThemeConfig,
@@ -22,6 +29,7 @@ type ThemeContextValue = {
     mode: ThemeMode,
     updater: (tokens: ThemeTokens) => ThemeTokens,
   ) => void;
+  syncTokenAcrossModes: (tokenId: keyof ThemeTokens, value: string) => void;
 };
 
 const ThemeContext = createContext<ThemeContextValue | undefined>(undefined);
@@ -58,30 +66,46 @@ export function ThemeProvider({
     persistThemeConfig(config);
   }, [config]);
 
-  const updateTokens = (
-    targetMode: ThemeMode,
-    updater: (tokens: ThemeTokens) => ThemeTokens,
-  ) => {
-    setConfig((previous) => ({
-      ...previous,
-      [targetMode]: updater(previous[targetMode]),
-    }));
-  };
-  const resetConfig = () => {
+  const updateTokens = useCallback(
+    (targetMode: ThemeMode, updater: (tokens: ThemeTokens) => ThemeTokens) => {
+      setConfig((previous) => ({
+        ...previous,
+        [targetMode]: updater(previous[targetMode]),
+      }));
+    },
+    [],
+  );
+  const syncTokenAcrossModes = useCallback(
+    (tokenId: keyof ThemeTokens, value: string) => {
+      setConfig((previous) => ({
+        light: {
+          ...previous.light,
+          [tokenId]: value,
+        },
+        dark: {
+          ...previous.dark,
+          [tokenId]: value,
+        },
+      }));
+    },
+    [],
+  );
+  const resetConfig = useCallback(() => {
     clearStoredThemeConfig();
     setConfig(defaultThemeConfig);
     setMode("light");
-  };
+  }, []);
 
   const value = useMemo(
     () => ({
       config,
       mode,
+      syncTokenAcrossModes,
       resetConfig,
       setMode,
       updateTokens,
     }),
-    [config, mode],
+    [config, mode, resetConfig, setMode, syncTokenAcrossModes, updateTokens],
   );
 
   return (

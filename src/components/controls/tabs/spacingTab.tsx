@@ -25,7 +25,7 @@ import {
 } from "@/lib/spacing";
 
 export function SpacingTab() {
-  const { config, mode, updateTokens } = useThemeConfig();
+  const { config, mode, syncTokenAcrossModes } = useThemeConfig();
   const activeTokens = config[mode];
   const [spacingValue, setSpacingValue] = useState(() => {
     const parsed = Number.parseFloat(activeTokens.spacing);
@@ -38,22 +38,16 @@ export function SpacingTab() {
 
   const debouncedSpacingUpdate = useMemo(() => {
     const fn = debounce((value: number) => {
-      updateTokens(mode, (tokens) => ({
-        ...tokens,
-        spacing: formatRem(value),
-      }));
+      syncTokenAcrossModes("spacing", formatRem(value));
     }, 150);
     return fn;
-  }, [mode, updateTokens]);
+  }, [syncTokenAcrossModes]);
   const debouncedRadiusUpdate = useMemo(() => {
     const fn = debounce((value: number) => {
-      updateTokens(mode, (tokens) => ({
-        ...tokens,
-        radius: formatRem(value),
-      }));
+      syncTokenAcrossModes("radius", formatRem(value));
     }, 150);
     return fn;
-  }, [mode, updateTokens]);
+  }, [syncTokenAcrossModes]);
 
   useEffect(() => {
     return () => {

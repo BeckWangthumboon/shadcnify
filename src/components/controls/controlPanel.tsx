@@ -23,7 +23,7 @@ export function ManualControlsPanel() {
     setMode(convertTarget);
   };
   const convertLabel =
-    mode === "light" ? "Convert to dark" : "Convert to light";
+    "Convert colors to " + (mode === "light" ? "dark" : "light");
   return (
     <Card className="flex h-full flex-col">
       <CardHeader className="gap-3">
