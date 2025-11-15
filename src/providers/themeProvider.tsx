@@ -7,6 +7,10 @@ import {
   defaultThemeConfig,
   themeVariableKeys,
 } from "@/lib/theme";
+import {
+  loadStoredThemeConfig,
+  persistThemeConfig,
+} from "@/lib/persistence";
 
 type ThemeContextValue = {
   config: ThemeConfig;
@@ -31,7 +35,10 @@ export function ThemeProvider({
   initialConfig = defaultThemeConfig,
   initialMode = "light",
 }: ThemeProviderProps) {
-  const [config, setConfig] = useState<ThemeConfig>(initialConfig);
+  const [config, setConfig] = useState<ThemeConfig>(() => {
+    if (typeof window === "undefined") return initialConfig;
+    return loadStoredThemeConfig(initialConfig);
+  });
   const [mode, setMode] = useState<ThemeMode>(initialMode);
   const activeTokens = config[mode];
 
@@ -44,6 +51,10 @@ export function ThemeProvider({
       root.style.setProperty(`--${key}`, activeTokens[key]);
     });
   }, [activeTokens, mode]);
+
+  useEffect(() => {
+    persistThemeConfig(config);
+  }, [config]);
 
   const updateTokens = (
     targetMode: ThemeMode,
