@@ -12,7 +12,7 @@ import { ColorsTab } from "./tabs/colorsTab";
 import { TypographyTab } from "./tabs/typographyTab";
 import { ShadowsTab } from "./tabs/shadowsTab";
 import { SpacingTab } from "./tabs/spacingTab";
-import { SidebarTab } from "./tabs/sidebarTab";
+import { ChartsTab } from "./tabs/chartsTab";
 import ModeToggle from "./modeToggle";
 import { Undo } from "lucide-react";
 
@@ -45,7 +45,7 @@ export function ManualControlsPanel() {
               <TabsTrigger value="typography">Typography</TabsTrigger>
               <TabsTrigger value="shadows">Shadows</TabsTrigger>
               <TabsTrigger value="spacing">Spacing</TabsTrigger>
-              <TabsTrigger value="sidebar">Sidebar & Charts</TabsTrigger>
+              <TabsTrigger value="charts">Charts</TabsTrigger>
             </TabsList>
           </div>
           <div className="mt-4 flex-1">
@@ -61,8 +61,8 @@ export function ManualControlsPanel() {
             <TabsContent value="spacing" className="h-full">
               <SpacingTab />
             </TabsContent>
-            <TabsContent value="sidebar" className="h-full">
-              <SidebarTab />
+            <TabsContent value="charts" className="h-full">
+              <ChartsTab />
             </TabsContent>
           </div>
         </Tabs>
