@@ -1,3 +1,4 @@
+import { useEffect, useMemo, useState } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Label } from "@/components/ui/label";
 import {
@@ -17,9 +18,14 @@ import {
 import { useThemeConfig } from "@/providers/themeProvider";
 import { fontGroups } from "@/lib/typography";
 import { cn } from "@/lib/utils";
+import { debounce } from "@/lib/debounce";
+import { Input } from "@/components/ui/input";
 
 type FontTokenId = (typeof fontGroups)[number]["token"];
 type FontOptionValue = string;
+const letterSpacingMin = -0.05;
+const letterSpacingMax = 0.35;
+const letterSpacingStep = 0.025;
 
 function resolveSelectedValue(
   tokenId: FontTokenId,
@@ -46,6 +52,30 @@ function resolveSelectedValue(
 export function TypographyTab() {
   const { config, mode, updateTokens } = useThemeConfig();
   const activeTokens = config[mode];
+  const [trackingValue, setTrackingValue] = useState(() => {
+    const parsed = Number.parseFloat(activeTokens["tracking-normal"]);
+    return Number.isFinite(parsed) ? parsed : letterSpacingMin;
+  });
+  const debouncedTrackingUpdate = useMemo(() => {
+    const fn = debounce((value: number) => {
+      updateTokens(mode, (tokens) => ({
+        ...tokens,
+        "tracking-normal": `${value}em`,
+      }));
+    }, 150);
+    return fn;
+  }, [mode, updateTokens]);
+
+  useEffect(() => {
+    return () => {
+      debouncedTrackingUpdate.cancel();
+    };
+  }, [debouncedTrackingUpdate]);
+
+  useEffect(() => {
+    const parsed = Number.parseFloat(activeTokens["tracking-normal"]);
+    setTrackingValue(Number.isFinite(parsed) ? parsed : letterSpacingMin);
+  }, [activeTokens["tracking-normal"]]);
 
   const handleFontChange = (tokenId: FontTokenId, optionName: string) => {
     const group = fontGroups.find((entry) => entry.token === tokenId);
@@ -61,6 +91,21 @@ export function TypographyTab() {
       [tokenId]: selectedOption.stack,
     }));
   };
+
+  const handleTrackingChange = (nextValue: number) => {
+    const normalized = Math.min(
+      letterSpacingMax,
+      Math.max(
+        letterSpacingMin,
+        Number.isFinite(nextValue) ? nextValue : letterSpacingMin,
+      ),
+    );
+
+    setTrackingValue(normalized);
+    debouncedTrackingUpdate(normalized);
+  };
+
+  const trackingDisplay = trackingValue.toFixed(3).replace(/\.?0+$/, "");
 
   return (
     <ScrollArea className="h-[420px] px-6">
@@ -124,6 +169,45 @@ export function TypographyTab() {
             </Card>
           );
         })}
+        <div className="rounded-2xl border p-4">
+          <div className="flex items-center justify-between text-sm font-medium">
+            <div>
+              <p>Letter spacing (tracking-normal)</p>
+              <p className="text-xs text-muted-foreground">
+                Adjust the space between characters for body text.
+              </p>
+            </div>
+            <span>{trackingDisplay}em</span>
+          </div>
+          <input
+            type="range"
+            min={letterSpacingMin}
+            max={letterSpacingMax}
+            step={letterSpacingStep}
+            value={trackingValue}
+            onChange={(event) =>
+              handleTrackingChange(Number.parseFloat(event.target.value))
+            }
+            className="accent-primary mt-4 h-2 w-full rounded-full bg-muted"
+            aria-label="Letter spacing"
+          />
+          <div className="mt-4 flex items-center gap-3">
+            <Label className="text-xs uppercase text-muted-foreground">
+              Precise value
+            </Label>
+            <Input
+              type="number"
+              step={letterSpacingStep}
+              min={letterSpacingMin}
+              max={letterSpacingMax}
+              value={trackingValue}
+              onChange={(event) =>
+                handleTrackingChange(Number.parseFloat(event.target.value))
+              }
+              className="h-9"
+            />
+          </div>
+        </div>
       </div>
     </ScrollArea>
   );
