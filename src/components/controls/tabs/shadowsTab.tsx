@@ -1,11 +1,13 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Input } from "@/components/ui/input";
 import { useThemeConfig } from "@/providers/themeProvider";
 import { ColorField } from "../controlFields";
 import { colorStringToHex, hexToHsl, isHexColor } from "@/lib/color";
+import { debounce } from "@/lib/debounce";
 import {
   type ShadowBaseControl,
+  type ShadowBaseControlId,
   type ShadowBaseValues,
   shadowBaseControls,
   buildShadowPresets,
@@ -27,6 +29,32 @@ export function ShadowsTab() {
   );
   const [colorError, setColorError] = useState<string>("");
 
+  const debouncedBaseCommit = useMemo(() => {
+    const fn = debounce(
+      (
+        controlId: ShadowBaseControlId,
+        formattedValue: string,
+        nextBaseValues: ShadowBaseValues,
+        colorHex: string,
+      ) => {
+        const derivedPresets = buildShadowPresets(nextBaseValues, colorHex);
+        updateTokens(mode, (tokens) => ({
+          ...tokens,
+          [controlId]: formattedValue,
+          ...derivedPresets,
+        }));
+      },
+      120,
+    );
+    return fn;
+  }, [mode, updateTokens]);
+
+  useEffect(() => {
+    return () => {
+      debouncedBaseCommit.cancel();
+    };
+  }, [debouncedBaseCommit]);
+
   useEffect(() => {
     setBaseValues(deriveShadowBaseValues(activeTokens));
   }, [activeTokens]);
@@ -46,13 +74,7 @@ export function ShadowsTab() {
         ? `${value}`
         : `${value}${control.unit ?? ""}`;
 
-    const derivedPresets = buildShadowPresets(nextBaseValues, shadowColor);
-
-    updateTokens(mode, (tokens) => ({
-      ...tokens,
-      [control.id]: formatted,
-      ...derivedPresets,
-    }));
+    debouncedBaseCommit(control.id, formatted, nextBaseValues, shadowColor);
   };
 
   const handleColorChange = (nextHex: string) => {
