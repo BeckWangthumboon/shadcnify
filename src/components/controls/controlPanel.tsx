@@ -7,6 +7,7 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useMemo } from "react";
 import { useThemeConfig } from "@/providers/themeProvider";
 import { ColorsTab } from "./tabs/colorsTab";
 import { TypographyTab } from "./tabs/typographyTab";
@@ -14,9 +15,21 @@ import { ShadowsTab } from "./tabs/shadowsTab";
 import { SpacingTab } from "./tabs/spacingTab";
 import { ChartsTab } from "./tabs/chartsTab";
 import ModeToggle from "./modeToggle";
+import { convertTokensForMode } from "@/lib/conversion";
 
 export function ManualControlsPanel() {
-  const { mode, setMode, resetConfig } = useThemeConfig();
+  const { mode, setMode, resetConfig, updateTokens } = useThemeConfig();
+  const convertTarget = useMemo(
+    () => (mode === "light" ? "dark" : "light"),
+    [mode],
+  );
+
+  const handleConvert = () => {
+    updateTokens(mode, (tokens) => convertTokensForMode(tokens, convertTarget));
+    setMode(convertTarget);
+  };
+  const convertLabel =
+    mode === "light" ? "Convert to dark" : "Convert to light";
   return (
     <Card className="flex h-full flex-col">
       <CardHeader className="gap-3">
@@ -30,14 +43,24 @@ export function ManualControlsPanel() {
           </div>
           <div className="flex flex-col items-end gap-3">
             <ModeToggle mode={mode} onChange={setMode} />
-            <Button
-              variant="ghost"
-              size="sm"
-              className="rounded-full px-4"
-              onClick={resetConfig}
-            >
-              Reset to default
-            </Button>
+            <div className="flex gap-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="rounded-full px-4"
+                onClick={handleConvert}
+              >
+                {convertLabel}
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="rounded-full px-4"
+                onClick={resetConfig}
+              >
+                Reset
+              </Button>
+            </div>
           </div>
         </div>
       </CardHeader>
