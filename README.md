@@ -1,45 +1,77 @@
-# Welcome to your Convex + React (Vite) + Convex Auth app
+# shadcnify
 
-This is a [Convex](https://convex.dev/) project created with [`npm create convex`](https://www.npmjs.com/package/create-convex).
+Tweakcn-inspired AI + manual theme generator for shadcn/ui projects. Describe a vibe in chat, get paired light/dark palettes, and refine tokens (colors, typography, shadows, spacing, sidebar) with instant preview.
 
-After the initial setup (<2 minutes) you'll have a working full-stack app using:
+## Features
 
-- Convex as your backend (database, server logic)
-- [React](https://react.dev/) as your frontend (web page interactivity)
-- [Vite](https://vitest.dev/) for optimized web hosting
-- [Tailwind](https://tailwindcss.com/) for building great looking UI
-- [Convex Auth](https://labs.convex.dev/auth) for authentication
+- **AI Theme Chat** – Convex actions stream LLM responses and tool calls that directly update `ThemeProvider` tokens in real time.
+- **Manual Theme Controls** – Color pickers, typography selectors, spacing / radius / shadow sliders for precise tweaks.
+- **Live Preview Playground** – Shadcn component gallery reflects every change so designers/developers can validate instantly.
+- **Persistent Theme State** – `ThemeProvider` syncs to `localStorage`, keeps light/dark tokens in sync when required, and supports sharing/export.
+- **Convex Backend** – Convex functions handle chat persistence/streaming via `@convex-dev/persistent-text-streaming`; AI tools are typed with Zod schemas.
 
-## Get started
+## Stack
 
-If you just cloned this codebase and didn't use `npm create convex`, run:
+- [React 19](https://react.dev/) + [Vite](https://vitejs.dev/)
+- [Tailwind CSS](https://tailwindcss.com/) with shadcn/ui primitives
+- [Convex](https://convex.dev/) backend + `@convex-dev/persistent-text-streaming`
+- [ai-sdk](https://sdk.vercel.ai/) for model + tool orchestration (OpenRouter provider)
+- [Bun](https://bun.sh/) for package/runtime (scripts use `bun`)
 
-```
-npm install
-npm run dev
-```
+## Getting Started
 
-If you're reading this README on GitHub and want to use this template, run:
+1. **Install dependencies**
 
-```
-npm create convex@latest -- -t react-vite-convexauth
-```
+   ```bash
+   bun install
+   ```
 
-For more information on how to configure Convex Auth, check out the [Convex Auth docs](https://labs.convex.dev/auth/).
+2. **Configure environment**
+   - Copy `.env.example` → `.env.local` (if present) or create `.env.local`.
+   - Set `OPENROUTER_API_KEY=<your key>` so `convex/ai.ts` can call OpenRouter.
+   - Optional Convex vars (auth, deployment) go in `.env.local` as well.
 
-For more examples of different Convex Auth flows, check out this [example repo](https://www.convex.dev/templates/convex-auth).
+3. **Run Convex dev tools once (recommended)**
 
-## Learn more
+   ```bash
+   bunx convex dev --once      # generates convex/_generated/*
+   ```
 
-To learn more about developing your project with Convex, check out:
+4. **Start the app**
+   ```bash
+   bun run dev                 # runs Vite + Convex together
+   ```
+   Visit `http://localhost:5173`.
 
-- The [Tour of Convex](https://docs.convex.dev/get-started) for a thorough introduction to Convex principles.
-- The rest of [Convex docs](https://docs.convex.dev/) to learn about all Convex features.
-- [Stack](https://stack.convex.dev/) for in-depth articles on advanced topics.
+### Other scripts
 
-## Join the community
+| Command                | Description                               |
+| ---------------------- | ----------------------------------------- |
+| `bun run dev:frontend` | Start Vite only                           |
+| `bun run dev:backend`  | Start Convex dev server only              |
+| `bun run build`        | Type-check + Vite build to `dist/`        |
+| `bun run preview`      | Serve production build locally            |
+| `bun run lint`         | `tsc` + ESLint (treat warnings as errors) |
 
-Join thousands of developers building full-stack apps with Convex:
+## How It Works
 
-- Join the [Convex Discord community](https://convex.dev/community) to get help in real-time.
-- Follow [Convex on GitHub](https://github.com/get-convex/), star and contribute to the open-source implementation of Convex.
+- **Theme Provider** (`src/providers/themeProvider.tsx`) stores light/dark token config, writes CSS variables to `:root`, and persists in `localStorage`.
+- **AI Tooling** (`convex/lib/theme.ts`) defines the `updateThemeTokens` tool schema using Zod. The LLM can only change tokens from this schema.
+- **Streaming Chat**:
+  1. Frontend posts prompt + current theme snapshot to `api.messages.sendMessage`.
+  2. Convex action `streamChat` runs `streamText` with our system prompt and tool.
+  3. When the model calls `updateThemeTokens`, we emit a base64 marker inside the stream; the client decodes it, applies updates via `ThemeProvider`, and shows a Task summary in the chat panel.
+- **Manual Controls** – Tabs under `src/components/controls` let users edit tokens directly (color pickers, sliders, etc.), debounced into `ThemeProvider`.
+
+## Customization Tips
+
+- **Add new tokens** – Extend `themeVariableKeys` and `themeUpdatesSchema`, then update UI controls + preview components to use them.
+- **Model provider** – Swap OpenRouter in `convex/ai.ts` for another provider compatible with ai-sdk.
+- **Prompt tuning** – `SYSTEM_MESSAGE` in `convex/ai.ts` contains all guardrails (spacing limits, light/dark sync). Adjust for new rules.
+
+## Troubleshooting
+
+- **Convex codegen errors** – Run `bunx convex dev --once` after modifying anything in `convex/`.
+- **AI responses missing updates** – Ensure your OpenRouter key is valid and the model supports tool calls.
+- **Lint failures** – `bun run lint` fails on warnings per repo policy; fix ESLint + TypeScript warnings before committing.
+- **Known issue** – The “dark-to-light” theme converter flow is still unreliable; expect mismatched tokens when trying to transplant dark palettes into light mode. Track progress in the issue tracker.
