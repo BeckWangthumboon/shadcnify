@@ -1,5 +1,5 @@
 import { v } from "convex/values";
-import { mutation } from "./_generated/server";
+import { mutation, query } from "./_generated/server";
 import { streamingComponent } from "./streaming";
 
 export const sendMessage = mutation({
@@ -16,5 +16,18 @@ export const sendMessage = mutation({
       chatId,
       responseStreamId,
     };
+  },
+});
+
+export const getMessages = query({
+  args: {
+    streamId: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const messages = await ctx.db
+      .query("userMessages")
+      .filter((q) => q.eq(q.field("responseStreamId"), args.streamId))
+      .collect();
+    return messages;
   },
 });
