@@ -10,6 +10,7 @@ import { SpacingTab } from "./tabs/spacingTab";
 import { ChartsTab } from "./tabs/chartsTab";
 import ModeToggle from "./modeToggle";
 import { convertTokensForMode } from "@/lib/conversion";
+import { ThemeExportDialog } from "./themeExportDialog";
 
 export function ManualControlsPanel() {
   const { mode, setMode, resetConfig, updateTokens } = useThemeConfig();
@@ -38,6 +39,7 @@ export function ManualControlsPanel() {
           <Button variant="secondary" size="sm" onClick={resetConfig}>
             Reset
           </Button>
+          <ThemeExportDialog variant="secondary" size="sm" triggerLabel="Export" />
         </div>
       </CardHeader>
       <CardContent className="flex-1 overflow-hidden px-0 pb-0">
