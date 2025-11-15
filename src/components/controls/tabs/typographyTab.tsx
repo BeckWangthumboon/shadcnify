@@ -75,7 +75,7 @@ export function TypographyTab() {
   useEffect(() => {
     const parsed = Number.parseFloat(activeTokens["tracking-normal"]);
     setTrackingValue(Number.isFinite(parsed) ? parsed : letterSpacingMin);
-  }, [activeTokens["tracking-normal"]]);
+  }, [activeTokens]);
 
   const handleFontChange = (tokenId: FontTokenId, optionName: string) => {
     const group = fontGroups.find((entry) => entry.token === tokenId);
