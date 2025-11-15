@@ -14,10 +14,9 @@ import { ShadowsTab } from "./tabs/shadowsTab";
 import { SpacingTab } from "./tabs/spacingTab";
 import { ChartsTab } from "./tabs/chartsTab";
 import ModeToggle from "./modeToggle";
-import { Undo } from "lucide-react";
 
 export function ManualControlsPanel() {
-  const { mode, setMode } = useThemeConfig();
+  const { mode, setMode, resetConfig } = useThemeConfig();
   return (
     <Card className="flex h-full flex-col">
       <CardHeader className="gap-3">
@@ -31,8 +30,13 @@ export function ManualControlsPanel() {
           </div>
           <div className="flex flex-col items-end gap-3">
             <ModeToggle mode={mode} onChange={setMode} />
-            <Button variant="ghost" size="icon-sm" className="rounded-full">
-              <Undo className="size-4" />
+            <Button
+              variant="ghost"
+              size="sm"
+              className="rounded-full px-4"
+              onClick={resetConfig}
+            >
+              Reset to default
             </Button>
           </div>
         </div>

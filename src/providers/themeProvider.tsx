@@ -8,6 +8,7 @@ import {
   themeVariableKeys,
 } from "@/lib/theme";
 import {
+  clearStoredThemeConfig,
   loadStoredThemeConfig,
   persistThemeConfig,
 } from "@/lib/persistence";
@@ -16,6 +17,7 @@ type ThemeContextValue = {
   config: ThemeConfig;
   mode: ThemeMode;
   setMode: (mode: ThemeMode) => void;
+  resetConfig: () => void;
   updateTokens: (
     mode: ThemeMode,
     updater: (tokens: ThemeTokens) => ThemeTokens,
@@ -65,11 +67,17 @@ export function ThemeProvider({
       [targetMode]: updater(previous[targetMode]),
     }));
   };
+  const resetConfig = () => {
+    clearStoredThemeConfig();
+    setConfig(defaultThemeConfig);
+    setMode("light");
+  };
 
   const value = useMemo(
     () => ({
       config,
       mode,
+      resetConfig,
       setMode,
       updateTokens,
     }),
