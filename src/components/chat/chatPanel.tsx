@@ -482,11 +482,7 @@ function formatThemeSnapshot(config: ThemeConfig) {
   const light = JSON.stringify(config.light, null, 2);
   const dark = JSON.stringify(config.dark, null, 2);
 
-  return [
-    "Light mode tokens:",
-    light,
-    "",
-    "Dark mode tokens:",
-    dark,
-  ].join("\n");
+  return ["Light mode tokens:", light, "", "Dark mode tokens:", dark].join(
+    "\n",
+  );
 }
