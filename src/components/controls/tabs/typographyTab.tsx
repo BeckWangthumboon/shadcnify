@@ -76,13 +76,13 @@ export function TypographyTab() {
             <Card key={group.token}>
               <CardHeader className="flex-row items-start justify-between gap-4">
                 <div>
-                  <CardTitle className="text-base">{group.label}</CardTitle>
-                  <CardDescription>
-                    {group.description} : {group.token}
-                  </CardDescription>
+                  <CardTitle className="text-base">
+                    {group.label + " (" + group.token + ")"}
+                  </CardTitle>
+                  <CardDescription>{group.description}</CardDescription>
                 </div>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-2">
                 <div
                   className={cn(
                     "rounded-lg border bg-muted/40 px-3 py-2 text-sm",
