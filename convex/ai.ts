@@ -31,7 +31,7 @@ const resolveChatModel = () => {
   );
 };
 
-export const streamChat = httpAction(async (ctx, request) => {
+export const streamChatHandler = async (ctx, request) => {
   const body = (await request.json()) as {
     streamId: string;
   };
@@ -56,4 +56,6 @@ export const streamChat = httpAction(async (ctx, request) => {
   );
 
   return response;
-});
+};
+
+export const streamChat = httpAction(streamChatHandler);
