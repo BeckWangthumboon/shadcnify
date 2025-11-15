@@ -32,80 +32,62 @@ export const fontGroups: FontGroup[] = [
       {
         name: "Inter",
         stack:
-          '"Inter", "SF Pro Display", "Segoe UI", "Helvetica Neue", system-ui, -apple-system, sans-serif',
+          '"Inter", "Plus Jakarta Sans", "IBM Plex Sans", system-ui, -apple-system, sans-serif',
         example: "Modern, neutral sans great for dense UIs.",
       },
       {
         name: "Plus Jakarta Sans",
-        stack:
-          '"Plus Jakarta Sans", "Inter", "SF Pro Display", "Segoe UI", sans-serif',
+        stack: '"Plus Jakarta Sans", "Inter", "Manrope", sans-serif',
         example: "Figma-style geometric sans with strong clarity.",
       },
       {
         name: "IBM Plex Sans",
-        stack:
-          '"IBM Plex Sans", "Segoe UI", "Helvetica Neue", Arial, sans-serif',
+        stack: '"IBM Plex Sans", "Inter", "Roboto", sans-serif',
         example: "Slightly wider sans with strong numerals.",
       },
       {
         name: "Manrope",
-        stack: '"Manrope", "Inter", "Segoe UI", sans-serif',
+        stack: '"Manrope", "Inter", "Mulish", sans-serif',
         example: "Clean, rounded geometric sans with excellent legibility.",
       },
       {
         name: "Work Sans",
-        stack: '"Work Sans", "Inter", "Helvetica Neue", Arial, sans-serif',
+        stack: '"Work Sans", "Inter", "Source Sans Pro", sans-serif',
         example: "Modern grotesk optimized for on-screen text.",
       },
       {
         name: "Nunito",
-        stack: '"Nunito", "Inter", "Segoe UI", sans-serif',
+        stack: '"Nunito", "Poppins", "Inter", sans-serif',
         example: "Friendly rounded sans for playful brands.",
       },
       {
         name: "Poppins",
-        stack: '"Poppins", "Inter", "Segoe UI", sans-serif',
+        stack: '"Poppins", "Montserrat", "Inter", sans-serif',
         example: "Geometric sans with strong personality and curves.",
       },
       {
         name: "Montserrat",
-        stack: '"Montserrat", "Inter", "Segoe UI", sans-serif',
+        stack: '"Montserrat", "Poppins", "Inter", sans-serif',
         example: "Bold, contemporary sans great for headings.",
       },
       {
         name: "Roboto",
-        stack: '"Roboto", "Inter", "Helvetica Neue", sans-serif',
+        stack: '"Roboto", "Inter", "Open Sans", sans-serif',
         example: "Google’s UI default, highly versatile.",
       },
       {
         name: "Open Sans",
-        stack: '"Open Sans", "Inter", "Segoe UI", sans-serif',
+        stack: '"Open Sans", "Roboto", "Inter", sans-serif',
         example: "Neutral, dependable sans for general UI.",
       },
       {
-        name: "Lato",
-        stack: '"Lato", "Inter", "Segoe UI", sans-serif',
-        example: "Warm, rounded sans ideal for friendly interfaces.",
-      },
-      {
         name: "Source Sans Pro",
-        stack: '"Source Sans Pro", "Inter", "Segoe UI", sans-serif',
+        stack: '"Source Sans Pro", "Inter", "Roboto", sans-serif',
         example: "Adobe’s clean sans for modern dashboards.",
       },
       {
-        name: "SF Pro Text",
-        stack:
-          '"SF Pro Text", -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", sans-serif',
-        example: "Native Apple UI look and feel.",
-      },
-      {
-        name: "Segoe UI",
-        stack: '"Segoe UI", "Inter", "Helvetica Neue", sans-serif',
-        example: "Windows system UI with wide availability.",
-      },
-      {
         name: "Mulish",
-        stack: '"Mulish", "Inter", "Segoe UI", sans-serif',
+        stack: '"Mulish", "Manrope", "Inter", sans-serif',
         example: "Sleek minimal sans suited for clean interfaces.",
       },
     ],
@@ -118,77 +100,77 @@ export const fontGroups: FontGroup[] = [
     options: [
       {
         name: "Playfair Display",
-        stack: '"Playfair Display", "Times New Roman", "Georgia", serif',
+        stack: '"Playfair Display", "Lora", "Merriweather", serif',
         example: "Classic magazine-style display serif.",
       },
       {
         name: "Merriweather",
-        stack: '"Merriweather", "Georgia", "Times New Roman", serif',
+        stack: '"Merriweather", "Source Serif 4", "Lora", serif',
         example: "Workhorse serif optimized for screens.",
       },
       {
         name: "Lora",
-        stack: '"Lora", "Georgia", "Times New Roman", serif',
+        stack: '"Lora", "Merriweather", "Libre Baskerville", serif',
         example: "Warm, balanced serif ideal for reading.",
       },
       {
         name: "Libre Baskerville",
-        stack: '"Libre Baskerville", "Georgia", "Times New Roman", serif',
+        stack: '"Libre Baskerville", "Lora", "Merriweather", serif',
         example: "Traditional book-style serif with clean lines.",
       },
       {
         name: "Source Serif 4",
-        stack: '"Source Serif 4", "Times New Roman", "Georgia", serif',
+        stack: '"Source Serif 4", "Merriweather", "Lora", serif',
         example: "Clean serif with excellent readability.",
       },
       {
         name: "Spectral",
-        stack: '"Spectral", "Times New Roman", "Georgia", serif',
+        stack: '"Spectral", "Source Serif 4", "Merriweather", serif',
         example: "Elegant serif with high-contrast strokes.",
       },
       {
         name: "Cormorant Garamond",
-        stack: '"Cormorant Garamond", "Times New Roman", "Georgia", serif',
+        stack: '"Cormorant Garamond", "EB Garamond", "Lora", serif',
         example: "Expressive serif with dramatic contrast.",
       },
       {
         name: "Bitter",
-        stack: '"Bitter", "Georgia", "Times New Roman", serif',
+        stack: '"Bitter", "Merriweather", "Lora", serif',
         example: "Robust serif designed for screen clarity.",
       },
       {
         name: "Crimson Text",
-        stack: '"Crimson Text", "Times New Roman", "Georgia", serif',
+        stack: '"Crimson Text", "Libre Baskerville", "Lora", serif',
         example: "Book-like serif inspired by classical typefaces.",
       },
       {
         name: "PT Serif",
-        stack: '"PT Serif", "Georgia", "Times New Roman", serif',
+        stack: '"PT Serif", "Merriweather", "Source Serif 4", serif',
         example: "Readable serif with contemporary accents.",
       },
       {
         name: "EB Garamond",
-        stack: '"EB Garamond", "Times New Roman", "Georgia", serif',
+        stack: '"EB Garamond", "Cormorant Garamond", "Lora", serif',
         example: "Elegant old-style serif with delicate curves.",
       },
       {
         name: "DM Serif Display",
-        stack: '"DM Serif Display", "Times New Roman", "Georgia", serif',
+        stack: '"DM Serif Display", "Playfair Display", "Spectral", serif',
         example: "High-contrast display serif for bold headings.",
       },
       {
         name: "Vollkorn",
-        stack: '"Vollkorn", "Georgia", "Times New Roman", serif',
+        stack: '"Vollkorn", "Merriweather", "Bitter", serif',
         example: "Sturdy serif with a traditional feel.",
       },
       {
         name: "Spectral",
-        stack: '"Spectral", "Times New Roman", "Georgia", serif',
+        stack: '"Spectral", "Source Serif 4", "Lora", serif',
         example: "Elegant serif with sharp contrast and serious tone.",
       },
       {
         name: "Literata",
-        stack: '"Literata", "Georgia", "Times New Roman", serif',
+        stack: '"Literata", "Merriweather", "Lora", serif',
         example: "Google Play Books’ serif — comfortable for long reading.",
       },
     ],
@@ -202,53 +184,54 @@ export const fontGroups: FontGroup[] = [
       {
         name: "JetBrains Mono",
         stack:
-          '"JetBrains Mono", "Fira Code", "SFMono-Regular", "Menlo", monospace',
+          '"JetBrains Mono", "Fira Code", "Menlo", "Source Code Pro", monospace',
         example: "Compact mono with ligature support.",
       },
       {
         name: "Fira Code",
         stack:
-          '"Fira Code", "JetBrains Mono", "SFMono-Regular", "Menlo", monospace',
+          '"Fira Code", "JetBrains Mono", "Menlo", "Source Code Pro", monospace',
         example: "Popular mono with programming ligatures.",
       },
       {
         name: "IBM Plex Mono",
-        stack: '"IBM Plex Mono", "SFMono-Regular", "Menlo", monospace',
+        stack:
+          '"IBM Plex Mono", "JetBrains Mono", "Fira Code", "Menlo", monospace',
         example: "Balanced mono with generous counters.",
       },
       {
         name: "Source Code Pro",
-        stack: '"Source Code Pro", "Fira Code", "SFMono-Regular", monospace',
+        stack: '"Source Code Pro", "JetBrains Mono", "Fira Code", monospace',
         example: "Adobe’s versatile mono for dense code.",
       },
       {
         name: "Inconsolata",
-        stack: '"Inconsolata", "JetBrains Mono", "Menlo", monospace',
+        stack: '"Inconsolata", "JetBrains Mono", "Fira Code", monospace',
         example: "Clean, friendly mono ideal for code blocks.",
       },
       {
         name: "Menlo",
-        stack: '"Menlo", "SFMono-Regular", "Consolas", monospace',
+        stack: '"Menlo", "JetBrains Mono", "Fira Code", "Consolas", monospace',
         example: "macOS system monospace with excellent clarity.",
       },
       {
         name: "Consolas",
-        stack: '"Consolas", "Menlo", monospace',
+        stack: '"Consolas", "Menlo", "JetBrains Mono", monospace',
         example: "Windows-native monospace great for dense text.",
       },
       {
         name: "Courier Prime",
-        stack: '"Courier Prime", "Courier New", monospace',
+        stack: '"Courier Prime", "Inconsolata", "Roboto Mono", monospace',
         example: "Modern take on Courier with improved readability.",
       },
       {
         name: "Ubuntu Mono",
-        stack: '"Ubuntu Mono", "JetBrains Mono", "Menlo", monospace',
+        stack: '"Ubuntu Mono", "JetBrains Mono", "Fira Code", monospace',
         example: "Humanist mono with warm visual tone.",
       },
       {
         name: "Space Mono",
-        stack: '"Space Mono", "IBM Plex Mono", "SFMono-Regular", monospace',
+        stack: '"Space Mono", "IBM Plex Mono", "JetBrains Mono", monospace',
         example: "Retro mono with geometric feel.",
       },
       {
@@ -258,23 +241,18 @@ export const fontGroups: FontGroup[] = [
       },
       {
         name: "Roboto Mono",
-        stack: '"Roboto Mono", "Source Code Pro", monospace',
+        stack: '"Roboto Mono", "Source Code Pro", "JetBrains Mono", monospace',
         example: "Friendly, neutral monospace for balanced UIs.",
       },
       {
         name: "PT Mono",
-        stack: '"PT Mono", "IBM Plex Mono", monospace',
+        stack: '"PT Mono", "IBM Plex Mono", "JetBrains Mono", monospace',
         example: "Clean professional mono for data tables.",
       },
       {
         name: "Noto Mono",
-        stack: '"Noto Mono", "Roboto Mono", monospace',
+        stack: '"Noto Mono", "Roboto Mono", "Source Code Pro", monospace',
         example: "Google’s wide-coverage mono with full Unicode.",
-      },
-      {
-        name: "Hack",
-        stack: '"Hack", "Fira Code", "Menlo", monospace',
-        example: "High-clarity developer mono with strong legibility.",
       },
     ],
   },

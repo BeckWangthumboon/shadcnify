@@ -1,6 +1,5 @@
 @import "tailwindcss";
 @import "tw-animate-css";
-@import url("https://api.fontshare.com/v2/css?f[]=general-sans@400,500,600&display=swap");
 
 @custom-variant dark (&:is(.dark *));
 
