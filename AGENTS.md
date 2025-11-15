@@ -31,3 +31,9 @@
 
 - Keep Convex environment variables and auth secrets in the Convex dashboard via CLI; never commit secrets or generated tokens.
 - After schema or auth changes, re-run `convex dev --until-success` followed by `bunx convex dev --once` to ensure the local deployment is seeded and generated bindings are current before pushing changes.
+
+## Project Context
+
+- Building a single-page shadcn theme generator inspired by Tweakcn: AI-assisted theme chat + manual editor on top, live preview playground below.
+- Theme state lives in `ThemeProvider`; colors are edited in hex (with OKLCH stored under the hood) via `react-colorful` pickers inside shadcn popovers.
+- Manual controls focus on Colors (with light/dark mode toggle), Typography, Shadows, Spacing, Sidebar; preview gallery renders shadcn components to validate changes instantly.

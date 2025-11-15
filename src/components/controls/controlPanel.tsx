@@ -1,0 +1,119 @@
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { useMemo } from "react";
+import { useThemeConfig } from "@/providers/themeProvider";
+import { ColorsTab } from "./tabs/colorsTab";
+import { TypographyTab } from "./tabs/typographyTab";
+import { ShadowsTab } from "./tabs/shadowsTab";
+import { SpacingTab } from "./tabs/spacingTab";
+import { ChartsTab } from "./tabs/chartsTab";
+import ModeToggle from "./modeToggle";
+import { convertTokensForMode } from "@/lib/conversion";
+import { ThemeExportDialog } from "./themeExportDialog";
+import { ThemeImportDialog } from "./themeImportDialog";
+import { RefreshCw, RotateCcw, Upload, Download } from "lucide-react";
+
+export function ManualControlsPanel() {
+  const { config, mode, setMode, resetConfig, updateTokens } =
+    useThemeConfig();
+  const convertTarget = useMemo(
+    () => (mode === "light" ? "dark" : "light"),
+    [mode],
+  );
+
+  const handleConvert = () => {
+    const converted = convertTokensForMode(config[mode], convertTarget);
+    updateTokens(convertTarget, () => converted);
+    setMode(convertTarget);
+  };
+  const convertLabel =
+    "Convert colors to " + (mode === "light" ? "dark" : "light");
+  return (
+    <Card className="flex h-full flex-col">
+      <CardHeader className="gap-3">
+        <div className="flex flex-row items-center justify-between">
+          <CardTitle>Manual Theme Controls</CardTitle>
+          <ModeToggle mode={mode} onChange={setMode} />
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="secondary"
+                size="icon-sm"
+                onClick={handleConvert}
+                className="rounded-full"
+              >
+                <RefreshCw className="size-4" />
+                <span className="sr-only">{convertLabel}</span>
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>{convertLabel}</TooltipContent>
+          </Tooltip>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="secondary"
+                size="icon-sm"
+                onClick={resetConfig}
+                className="rounded-full"
+              >
+                <RotateCcw className="size-4" />
+                <span className="sr-only">Reset theme</span>
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Reset theme</TooltipContent>
+          </Tooltip>
+          <ThemeExportDialog
+            variant="secondary"
+            size="icon-sm"
+            triggerLabel=""
+            className="rounded-full"
+            triggerIcon={<Upload className="size-4" />}
+            tooltip="Export theme"
+          />
+          <ThemeImportDialog
+            variant="secondary"
+            size="icon-sm"
+            triggerLabel=""
+            className="rounded-full"
+            triggerIcon={<Download className="size-4" />}
+            tooltip="Import theme"
+          />
+        </div>
+      </CardHeader>
+      <CardContent className="flex-1 overflow-hidden px-0 pb-0">
+        <Tabs defaultValue="colors" className="flex h-full flex-col">
+          <div className="px-6">
+            <TabsList className="w-full justify-start">
+              <TabsTrigger value="colors">Colors</TabsTrigger>
+              <TabsTrigger value="typography">Typography</TabsTrigger>
+              <TabsTrigger value="shadows">Shadows</TabsTrigger>
+              <TabsTrigger value="spacing">Spacing</TabsTrigger>
+              <TabsTrigger value="charts">Charts</TabsTrigger>
+            </TabsList>
+          </div>
+          <div className="mt-4 flex-1">
+            <TabsContent value="colors" className="h-full">
+              <ColorsTab />
+            </TabsContent>
+            <TabsContent value="typography" className="h-full">
+              <TypographyTab />
+            </TabsContent>
+            <TabsContent value="shadows" className="h-full">
+              <ShadowsTab />
+            </TabsContent>
+            <TabsContent value="spacing" className="h-full">
+              <SpacingTab />
+            </TabsContent>
+            <TabsContent value="charts" className="h-full">
+              <ChartsTab />
+            </TabsContent>
+          </div>
+        </Tabs>
+      </CardContent>
+    </Card>
+  );
+}
