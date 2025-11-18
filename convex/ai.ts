@@ -37,6 +37,115 @@ Best practices:
 7. Only modify the tokens that are necessary for the requested vibe—avoid broad changes when a minimal tweak will do.
 8. Explain why each change supports the described vibe, referencing shadcn/ui components (cards, sidebar, inputs) when helpful.
 9. **Multi-primary color themes** — For designs requiring multiple bright colors (neobrutalism, rainbow, retro palettes), create a black/white foundation and provide custom CSS tokens in OKLCH format for manual color application. Explain that theme tokens work best for harmonious color systems, not competing bright colors.
+
+10. **Color hierarchy** — Primary should dominate and be used for main actions. Secondary should support and complement. Accent should highlight specific elements sparingly. Maintain clear visual hierarchy.
+
+11. **Style-specific guidelines** — Different aesthetics have different personalities:
+- **Minimalist**: Tight spacing (0.2rem), subtle borders, minimal shadows, high contrast
+- **Neobrutalist**: No shadows, thick borders (3px+), sharp corners (0rem radius), high contrast
+- **Playful**: Rounded corners (1rem+), warm colors, soft shadows, generous spacing
+- **Professional**: Medium spacing (0.25rem), defined shadows, muted tones, clear hierarchy
+
+12. **Spacing philosophy** — Dense designs use 0.2rem for compact layouts. Airy designs use 0.3rem for breathing room. Default to 0.25rem for balanced layouts.
+
+Example implementations (JSON):
+\`\`\`json
+{
+  "minimalist": {
+    "background": "#ffffff",
+    "foreground": "#0a0a0a",
+    "card": "#fafafa",
+    "card-foreground": "#0a0a0a",
+    "popover": "#ffffff",
+    "popover-foreground": "#0a0a0a",
+    "primary": "#0a0a0a",
+    "primary-foreground": "#ffffff",
+    "secondary": "#f5f5f5",
+    "secondary-foreground": "#0a0a0a",
+    "muted": "#f5f5f5",
+    "muted-foreground": "#737373",
+    "accent": "#0a0a0a",
+    "accent-foreground": "#ffffff",
+    "destructive": "#dc2626",
+    "destructive-foreground": "#ffffff",
+    "border": "#e5e5e5",
+    "input": "#e5e5e5",
+    "ring": "#0a0a0a",
+    "radius": 0.25,
+    "spacing": 0.2
+  },
+  "neobrutalist": {
+    "background": "#ffffff",
+    "foreground": "#000000",
+    "card": "#ffffff",
+    "card-foreground": "#000000",
+    "popover": "#ffffff",
+    "popover-foreground": "#000000",
+    "primary": "#ff006e",
+    "primary-foreground": "#ffffff",
+    "secondary": "#ffbe0b",
+    "secondary-foreground": "#000000",
+    "muted": "#f0f0f0",
+    "muted-foreground": "#666666",
+    "accent": "#fb5607",
+    "accent-foreground": "#ffffff",
+    "destructive": "#000000",
+    "destructive-foreground": "#ffffff",
+    "border": "#000000",
+    "input": "#000000",
+    "ring": "#ff006e",
+    "radius": 0,
+    "spacing": 0.3
+  },
+  "playful": {
+    "background": "#fef3c7",
+    "foreground": "#78350f",
+    "card": "#ffffff",
+    "card-foreground": "#78350f",
+    "popover": "#ffffff",
+    "popover-foreground": "#78350f",
+    "primary": "#f59e0b",
+    "primary-foreground": "#ffffff",
+    "secondary": "#10b981",
+    "secondary-foreground": "#ffffff",
+    "muted": "#fde68a",
+    "muted-foreground": "#92400e",
+    "accent": "#ec4899",
+    "accent-foreground": "#ffffff",
+    "destructive": "#ef4444",
+    "destructive-foreground": "#ffffff",
+    "border": "#fbbf24",
+    "input": "#fbbf24",
+    "ring": "#f59e0b",
+    "radius": 1.25,
+    "spacing": 0.3
+  },
+  "darkProfessional": {
+    "background": "#0f172a",
+    "foreground": "#f1f5f9",
+    "card": "#1e293b",
+    "card-foreground": "#f1f5f9",
+    "popover": "#1e293b",
+    "popover-foreground": "#f1f5f9",
+    "primary": "#3b82f6",
+    "primary-foreground": "#ffffff",
+    "secondary": "#64748b",
+    "secondary-foreground": "#f1f5f9",
+    "muted": "#334155",
+    "muted-foreground": "#94a3b8",
+    "accent": "#10b981",
+    "accent-foreground": "#ffffff",
+    "destructive": "#ef4444",
+    "destructive-foreground": "#ffffff",
+    "border": "#475569",
+    "input": "#334155",
+    "ring": "#3b82f6",
+    "radius": 0.5,
+    "spacing": 0.25
+  }
+}
+\`\`\`
+
 Do not invent new tokens—if something isn't part of the tool schema, describe it conceptually instead.`,
 };
 
