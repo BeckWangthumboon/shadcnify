@@ -466,16 +466,51 @@ function convertThemeTokenUpdates(
   return { convertedTokens, tokenNames };
 }
 
-function convertSingleTokenValue(tokenId: ThemeVariable, value: string) {
+function convertSingleTokenValue(
+  tokenId: ThemeVariable,
+  value: string | number,
+) {
+  const stringValue = String(value).trim();
+
   if (COLOR_TOKEN_SET.has(tokenId)) {
-    return hexToOklch(value.trim()) ?? null;
+    return hexToOklch(stringValue) ?? null;
   }
 
   if (tokenId === "shadow-color") {
-    return hexToHsl(value.trim());
+    return hexToHsl(stringValue);
   }
 
-  return value;
+  // Handle numeric tokens that need proper units
+  if (typeof value === "number" || !isNaN(Number(value))) {
+    const numValue = Number(value);
+
+    // Validate the numeric value is within reasonable bounds
+    if (!isFinite(numValue)) {
+      console.warn(`Invalid numeric value for ${tokenId}:`, value);
+      return null;
+    }
+
+    // Spacing and radius use rem units
+    if (tokenId === "spacing" || tokenId === "radius") {
+      // Clamp values to reasonable ranges
+      const clampedValue = Math.max(0, Math.min(numValue, 10)); // 0-10rem max
+      return `${clampedValue}rem`;
+    }
+
+    // Shadow positioning and blur use px units
+    if (tokenId.startsWith("shadow-")) {
+      if (tokenId === "shadow-opacity") {
+        // Clamp opacity between 0 and 1
+        const clampedOpacity = Math.max(0, Math.min(numValue, 1));
+        return String(clampedOpacity);
+      }
+      // For shadow positions and blur, allow reasonable ranges
+      const clampedValue = Math.max(-100, Math.min(numValue, 100)); // -100px to 100px
+      return `${clampedValue}px`;
+    }
+  }
+
+  return stringValue;
 }
 
 function formatThemeSnapshot(config: ThemeConfig) {

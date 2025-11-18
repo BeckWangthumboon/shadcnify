@@ -8,7 +8,7 @@ export const THEME_UPDATE_MARKER_PATTERN =
 export type ThemeUpdateMarkerPayload = {
   toolCallId: string;
   targetMode: ThemeMode;
-  updates: Record<string, string | undefined>;
+  updates: Record<string, string | number | undefined>;
 };
 
 type BufferLike = {
