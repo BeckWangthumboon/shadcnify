@@ -3,6 +3,7 @@ import { createRoot } from "react-dom/client";
 import { ClerkProvider, useAuth } from "@clerk/clerk-react";
 import { ConvexProviderWithClerk } from "convex/react-clerk";
 import { ConvexReactClient } from "convex/react";
+import { RouterProvider } from "@tanstack/react-router";
 import "@fontsource/inter/400.css";
 import "@fontsource/inter/500.css";
 import "@fontsource/inter/600.css";
@@ -61,7 +62,7 @@ import "@fontsource/pt-mono/400.css";
 import "@fontsource/noto-mono/400.css";
 import "./styles/general-sans.css";
 import "./index.css";
-import App from "./App.tsx";
+import { router } from "./router";
 import { ThemeProvider } from "@/providers/themeProvider";
 
 const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
@@ -77,7 +78,7 @@ createRoot(document.getElementById("root")!).render(
     <ClerkProvider publishableKey={PUBLISHABLE_KEY}>
       <ConvexProviderWithClerk client={convex} useAuth={useAuth}>
         <ThemeProvider>
-          <App />
+          <RouterProvider router={router} />
         </ThemeProvider>
       </ConvexProviderWithClerk>
     </ClerkProvider>
