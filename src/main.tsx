@@ -1,6 +1,7 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import { ConvexAuthProvider } from "@convex-dev/auth/react";
+import { ClerkProvider, useAuth } from "@clerk/clerk-react";
+import { ConvexProviderWithClerk } from "convex/react-clerk";
 import { ConvexReactClient } from "convex/react";
 import "@fontsource/inter/400.css";
 import "@fontsource/inter/500.css";
@@ -63,14 +64,22 @@ import "./index.css";
 import App from "./App.tsx";
 import { ThemeProvider } from "@/providers/themeProvider";
 
+const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
+
+if (!PUBLISHABLE_KEY) {
+  throw new Error("Missing Publishable Key");
+}
+
 const convex = new ConvexReactClient(import.meta.env.VITE_CONVEX_URL as string);
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <ConvexAuthProvider client={convex}>
-      <ThemeProvider>
-        <App />
-      </ThemeProvider>
-    </ConvexAuthProvider>
+    <ClerkProvider publishableKey={PUBLISHABLE_KEY}>
+      <ConvexProviderWithClerk client={convex} useAuth={useAuth}>
+        <ThemeProvider>
+          <App />
+        </ThemeProvider>
+      </ConvexProviderWithClerk>
+    </ClerkProvider>
   </StrictMode>,
 );
