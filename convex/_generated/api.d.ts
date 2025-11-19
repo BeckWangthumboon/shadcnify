@@ -13,6 +13,7 @@ import type * as http from "../http.js";
 import type * as lib_theme from "../lib/theme.js";
 import type * as messages from "../messages.js";
 import type * as streaming from "../streaming.js";
+import type * as users from "../users.js";
 
 import type {
   ApiFromModules,
@@ -26,6 +27,7 @@ declare const fullApi: ApiFromModules<{
   "lib/theme": typeof lib_theme;
   messages: typeof messages;
   streaming: typeof streaming;
+  users: typeof users;
 }>;
 
 /**
