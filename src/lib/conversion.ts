@@ -148,6 +148,16 @@ export function convertSingleTokenValue(
     return hexToHsl(stringValue);
   }
 
+  if (tokenId === "tracking-normal") {
+    const parsed = Number.parseFloat(stringValue);
+    if (!Number.isFinite(parsed)) {
+      console.warn(`Invalid tracking value: ${value}`);
+      return null;
+    }
+    const clamped = Math.max(-0.05, Math.min(parsed, 0.1));
+    return `${clamped}em`;
+  }
+
   // Handle numeric tokens that need proper units
   if (typeof value === "number" || !isNaN(Number(value))) {
     const numValue = Number(value);
