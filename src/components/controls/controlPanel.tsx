@@ -15,6 +15,9 @@ import { ThemeExportDialog } from "./themeExportDialog";
 import { ThemeImportDialog } from "./themeImportDialog";
 import { RefreshCw, RotateCcw, Upload, Download } from "lucide-react";
 
+
+import { ThemeTemplatesSelector } from "./themeTemplatesSelector";
+
 export function ManualControlsPanel() {
   const { config, mode, setMode, resetConfig, updateTokens } =
     useThemeConfig();
@@ -82,6 +85,8 @@ export function ManualControlsPanel() {
             triggerIcon={<Download className="size-4" />}
             tooltip="Import theme"
           />
+          <div className="w-px h-6 bg-border mx-1" />
+          <ThemeTemplatesSelector />
         </div>
       </CardHeader>
       <CardContent className="flex-1 overflow-hidden px-0 pb-0">
@@ -117,3 +122,5 @@ export function ManualControlsPanel() {
     </Card>
   );
 }
+
+

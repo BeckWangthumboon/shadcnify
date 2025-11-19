@@ -19,7 +19,8 @@ export function hexToOklch(hex: string): string | null {
   try {
     const color = new Color(hex);
     const { l, c, h } = color.to("oklch");
-    return `oklch(${round(l)} ${round(c)} ${round(h)})`;
+    const hue = Number.isNaN(h) ? 0 : h;
+    return `oklch(${round(l)} ${round(c)} ${round(hue)})`;
   } catch {
     return null;
   }

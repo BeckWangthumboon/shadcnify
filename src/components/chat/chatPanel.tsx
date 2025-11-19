@@ -34,7 +34,7 @@ import { useStream } from "@convex-dev/persistent-text-streaming/react";
 import type { StreamId } from "@convex-dev/persistent-text-streaming";
 import { getConvexSiteUrl } from "@/lib/utils";
 import { useThemeConfig } from "@/providers/themeProvider";
-import { hexToHsl, hexToOklch } from "@/lib/color";
+
 import type {
   ThemeConfig,
   ThemeMode,
@@ -45,6 +45,7 @@ import {
   decodeThemeUpdateMarkerPayload,
   type ThemeUpdateMarkerPayload,
 } from "@/lib/themeUpdateMarkers";
+import { convertSingleTokenValue } from "@/lib/conversion";
 
 export type ChatMessage = {
   id: string;
@@ -381,47 +382,13 @@ function ThemeUpdateTask({ updates }: { updates: ThemeUpdateSummary[] }) {
             </div>
           </TaskItem>
         ))}
+```
       </TaskContent>
     </Task>
   );
 }
 
-const COLOR_TOKEN_IDS: ThemeVariable[] = [
-  "background",
-  "foreground",
-  "card",
-  "card-foreground",
-  "popover",
-  "popover-foreground",
-  "primary",
-  "primary-foreground",
-  "secondary",
-  "secondary-foreground",
-  "muted",
-  "muted-foreground",
-  "accent",
-  "accent-foreground",
-  "destructive",
-  "destructive-foreground",
-  "border",
-  "input",
-  "ring",
-  "chart-1",
-  "chart-2",
-  "chart-3",
-  "chart-4",
-  "chart-5",
-  "sidebar",
-  "sidebar-foreground",
-  "sidebar-primary",
-  "sidebar-primary-foreground",
-  "sidebar-accent",
-  "sidebar-accent-foreground",
-  "sidebar-border",
-  "sidebar-ring",
-];
 
-const COLOR_TOKEN_SET = new Set<ThemeVariable>(COLOR_TOKEN_IDS);
 
 function extractThemeUpdatePayloads(text: string): {
   cleanText: string;
@@ -466,52 +433,7 @@ function convertThemeTokenUpdates(
   return { convertedTokens, tokenNames };
 }
 
-function convertSingleTokenValue(
-  tokenId: ThemeVariable,
-  value: string | number,
-) {
-  const stringValue = String(value).trim();
 
-  if (COLOR_TOKEN_SET.has(tokenId)) {
-    return hexToOklch(stringValue) ?? null;
-  }
-
-  if (tokenId === "shadow-color") {
-    return hexToHsl(stringValue);
-  }
-
-  // Handle numeric tokens that need proper units
-  if (typeof value === "number" || !isNaN(Number(value))) {
-    const numValue = Number(value);
-
-    // Validate the numeric value is within reasonable bounds
-    if (!isFinite(numValue)) {
-      console.warn(`Invalid numeric value for ${tokenId}:`, value);
-      return null;
-    }
-
-    // Spacing and radius use rem units
-    if (tokenId === "spacing" || tokenId === "radius") {
-      // Clamp values to reasonable ranges
-      const clampedValue = Math.max(0, Math.min(numValue, 10)); // 0-10rem max
-      return `${clampedValue}rem`;
-    }
-
-    // Shadow positioning and blur use px units
-    if (tokenId.startsWith("shadow-")) {
-      if (tokenId === "shadow-opacity") {
-        // Clamp opacity between 0 and 1
-        const clampedOpacity = Math.max(0, Math.min(numValue, 1));
-        return String(clampedOpacity);
-      }
-      // For shadow positions and blur, allow reasonable ranges
-      const clampedValue = Math.max(-100, Math.min(numValue, 100)); // -100px to 100px
-      return `${clampedValue}px`;
-    }
-  }
-
-  return stringValue;
-}
 
 function formatThemeSnapshot(config: ThemeConfig) {
   const light = JSON.stringify(config.light, null, 2);
