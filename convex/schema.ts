@@ -39,7 +39,7 @@ const schema = defineSchema({
     ),
   })
     .index("by_thread", ["threadId"])
-    .index("by_thread_createdAt", ["threadId", "_creationTime"])
+    .index("by_thread_createdAt", ["threadId"])
     .index("by_responseStreamId", ["responseStreamId"]),
 });
 

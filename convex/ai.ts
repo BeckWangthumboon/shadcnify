@@ -3,9 +3,8 @@ import { StreamId } from "@convex-dev/persistent-text-streaming";
 import { streamingComponent } from "./streaming";
 import { streamText, type SystemModelMessage } from "ai";
 import { createOpenRouter } from "@openrouter/ai-sdk-provider";
-import { GenericActionCtx } from "convex/server";
 import { DataModel } from "./_generated/dataModel";
-import { api } from "./_generated/api";
+import { internal } from "./_generated/api";
 import { updateThemeTokensTool } from "./lib/theme";
 import {
   THEME_UPDATE_MARKER_PREFIX,
@@ -13,6 +12,7 @@ import {
   encodeThemeUpdateMarkerPayload,
   type ThemeUpdateMarkerPayload,
 } from "../src/lib/themeUpdateMarkers";
+import { GenericActionCtx, GenericDataModel } from "convex/server";
 
 const OPENROUTER_MODEL = "z-ai/glm-4.5-air:free";
 
@@ -58,24 +58,41 @@ const resolveChatModel = () => {
 };
 
 export const streamChatHandler = async (
-  ctx: GenericActionCtx<DataModel>,
+  ctx: GenericActionCtx<GenericDataModel>,
   request: Request,
 ) => {
   const body = (await request.json()) as {
     streamId: string;
   };
 
+  // verifiy that the stream id is valid and user owns the stream id and thread
   const streamId = body.streamId as StreamId;
-
-  const [messageRecord] = await ctx.runQuery(api.messages.getMessages, {
-    streamId,
-  });
-
+  const messageRecord = await ctx.runQuery(
+    internal.messages.getMessageByStreamId,
+    {
+      streamId,
+    },
+  );
   if (!messageRecord) {
     return new Response("Unknown stream id", {
       status: 404,
     });
   }
+
+  // fetch the full thread history to give the model context
+  const history = await ctx.runQuery(internal.messages.getThreadMessages, {
+    threadId: messageRecord.threadId,
+  });
+
+  let assistantText = "";
+
+  const modelMessages = [
+    SYSTEM_MESSAGE,
+    ...history.map((msg) => ({
+      role: msg.role,
+      content: msg.content,
+    })),
+  ];
 
   const response = await streamingComponent.stream(
     ctx,
@@ -84,13 +101,7 @@ export const streamChatHandler = async (
     async (_ctx, _request, _streamId, append) => {
       const result = streamText({
         model: resolveChatModel(),
-        messages: [
-          SYSTEM_MESSAGE,
-          {
-            role: "user",
-            content: messageRecord.prompt,
-          },
-        ],
+        messages: modelMessages,
         tools: {
           updateThemeTokens: updateThemeTokensTool,
         },
@@ -99,6 +110,7 @@ export const streamChatHandler = async (
       for await (const part of result.fullStream) {
         if (part.type === "text-delta") {
           if (part.text.length === 0) continue;
+          assistantText += part.text;
           await append(part.text);
           continue;
         }
@@ -122,6 +134,15 @@ export const streamChatHandler = async (
       }
 
       await result.response;
+
+      // persist the assistant reply (text only for now)
+      if (assistantText.trim().length > 0) {
+        await ctx.runMutation(internal.messages.recordAssistantMessage, {
+          threadId: messageRecord.threadId,
+          content: assistantText,
+          responseStreamId: streamId,
+        });
+      }
     },
   );
 
