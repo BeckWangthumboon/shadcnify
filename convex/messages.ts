@@ -77,7 +77,10 @@ export async function saveAssistantMessage(
   ctx: MutationCtx,
   threadId: Id<"threads">,
   content: string,
-  extras?: Pick<SaveMessageInput, "toolCalls" | "toolResults" | "responseStreamId">,
+  extras?: Pick<
+    SaveMessageInput,
+    "toolCalls" | "toolResults" | "responseStreamId"
+  >,
 ) {
   return await saveMessage(ctx, {
     threadId,
@@ -146,7 +149,7 @@ export const getThreadMessages = internalQuery({
 
     return await ctx.db
       .query("messages")
-      .withIndex("by_thread_createdAt", (q) => q.eq("threadId", args.threadId))
+      .withIndex("by_thread", (q) => q.eq("threadId", args.threadId))
       .collect();
   },
 });
