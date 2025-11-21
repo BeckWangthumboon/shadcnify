@@ -3,8 +3,7 @@ import { StreamId } from "@convex-dev/persistent-text-streaming";
 import { streamingComponent } from "./streaming";
 import { streamText, type SystemModelMessage } from "ai";
 import { createOpenRouter } from "@openrouter/ai-sdk-provider";
-import { DataModel } from "./_generated/dataModel";
-import { internal } from "./_generated/api";
+import { internal, api } from "./_generated/api";
 import { updateThemeTokensTool } from "./lib/theme";
 import {
   THEME_UPDATE_MARKER_PREFIX,
@@ -80,7 +79,7 @@ export const streamChatHandler = async (
   }
 
   // fetch the full thread history to give the model context
-  const history = await ctx.runQuery(internal.messages.getThreadMessages, {
+  const history = await ctx.runQuery(api.messages.getThreadMessages, {
     threadId: messageRecord.threadId,
   });
 
@@ -90,7 +89,10 @@ export const streamChatHandler = async (
     SYSTEM_MESSAGE,
     ...history.map((msg) => ({
       role: msg.role,
-      content: msg.content,
+      content:
+        msg.role === "user" && msg.userMetadata
+          ? `${msg.userMetadata.theme}\n\nUser prompt:\n${msg.userMetadata.prompt ?? msg.content}`
+          : msg.content,
     })),
   ];
 

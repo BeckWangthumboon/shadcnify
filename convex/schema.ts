@@ -17,6 +17,12 @@ const schema = defineSchema({
       v.literal("user"),
     ),
     content: v.string(),
+    userMetadata: v.optional(
+      v.object({
+        theme: v.string(), //theme snapshot
+        prompt: v.optional(v.string()),
+      }),
+    ),
     responseStreamId: v.optional(v.string()),
     toolCalls: v.optional(
       v.array(

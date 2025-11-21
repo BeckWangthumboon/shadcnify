@@ -5,6 +5,7 @@ import {
   mutation,
   type MutationCtx,
   type QueryCtx,
+  query,
 } from "./_generated/server";
 import { streamingComponent } from "./streaming";
 import type { Doc, Id } from "./_generated/dataModel";
@@ -53,6 +54,10 @@ type SaveMessageInput = {
   threadId: Id<"threads">;
   role: (typeof MESSAGE_ROLES)[number];
   content: string;
+  userMetadata?: {
+    theme: string;
+    prompt?: string;
+  };
   responseStreamId?: string;
   toolCalls?: Doc<"messages">["toolCalls"];
   toolResults?: Doc<"messages">["toolResults"];
@@ -66,6 +71,7 @@ export async function saveMessage(
     threadId: input.threadId,
     role: input.role,
     content: input.content,
+    userMetadata: input.userMetadata,
     responseStreamId: input.responseStreamId,
     toolCalls: input.toolCalls,
     toolResults: input.toolResults,
@@ -112,7 +118,8 @@ export const recordAssistantMessage = internalMutation({
 // Public mutation to post a user message and start streaming.
 export const sendMessage = mutation({
   args: {
-    prompt: v.string(),
+    prompt: v.string(), // user-visible prompt
+    structuredPrompt: v.optional(v.string()), // optional model-friendly prompt
     threadId: v.optional(v.id("threads")),
   },
   handler: async (ctx, args) => {
@@ -130,6 +137,9 @@ export const sendMessage = mutation({
       threadId,
       role: "user",
       content: args.prompt,
+      userMetadata: args.structuredPrompt
+        ? { theme: args.structuredPrompt, prompt: args.prompt }
+        : undefined,
       responseStreamId,
     });
 
@@ -138,7 +148,7 @@ export const sendMessage = mutation({
 });
 
 // Internal query: ordered messages for a thread.
-export const getThreadMessages = internalQuery({
+export const getThreadMessages = query({
   args: {
     threadId: v.id("threads"),
   },

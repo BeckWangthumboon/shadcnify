@@ -1,5 +1,5 @@
-import { useCallback, useState, type FormEvent } from "react";
-import { useMutation } from "convex/react";
+import { useCallback, useMemo, useState, type FormEvent } from "react";
+import { useMutation, useQuery } from "convex/react";
 import {
   Card,
   CardContent,
@@ -16,6 +16,8 @@ import { Loader2, Send, Sparkles } from "lucide-react";
 import { Message, MessageContent } from "@/components/ai-elements/message";
 import { useThemeConfig } from "@/providers/themeProvider";
 import { api } from "../../../convex/_generated/api";
+import type { Id } from "../../../convex/_generated/dataModel";
+import type { StreamId } from "@convex-dev/persistent-text-streaming";
 import {
   buildStructuredPrompt,
   createAssistantPlaceholder,
@@ -31,6 +33,7 @@ export function ChatPanel() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [prompt, setPrompt] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [threadId, setThreadId] = useState<Id<"threads"> | null>(null);
   const [activeAssistantId, setActiveAssistantId] = useState<string | null>(
     null,
   );
@@ -38,7 +41,18 @@ export function ChatPanel() {
     Record<string, ThemeUpdateSummary[]>
   >({});
   const sendMessage = useMutation(api.messages.sendMessage);
-  const hasMessages = messages.length > 0;
+  const history = useQuery(api.messages.getThreadMessages, threadId ? { threadId } : "skip");
+  const historyMessages = useMemo(() => {
+    if (!history) return null;
+    return history
+      .filter((message) => message.role === "user" || message.role === "assistant")
+      .map((message) => ({
+        id: message._id,
+        role: message.role as "user" | "assistant",
+        content: message.content,
+        streamId: message.responseStreamId as StreamId | undefined,
+      }));
+  }, [history]);
   const { config } = useThemeConfig();
 
   const sendPrompt = useCallback(async () => {
@@ -58,9 +72,17 @@ export function ChatPanel() {
 
     try {
       const structuredPrompt = buildStructuredPrompt(trimmedPrompt, config);
-      const { responseStreamId } = await sendMessage({
-        prompt: structuredPrompt,
-      });
+      const { responseStreamId, threadId: returnedThreadId } = await sendMessage(
+        {
+          prompt: trimmedPrompt,
+          structuredPrompt,
+          threadId: threadId ?? undefined,
+        },
+      );
+
+      if (!threadId) {
+        setThreadId(returnedThreadId);
+      }
 
       setMessages((current) =>
         current.map((message) =>
@@ -108,6 +130,30 @@ export function ChatPanel() {
     [],
   );
 
+  const activePlaceholder = useMemo(
+    () =>
+      messages.find(
+        (message) => message.role === "assistant" && message.streamId !== undefined,
+      ),
+    [messages],
+  );
+
+  const displayMessages = historyMessages
+    ? [
+        ...historyMessages,
+        ...(activePlaceholder &&
+        !historyMessages.some(
+          (message) =>
+            message.streamId !== undefined &&
+            activePlaceholder.streamId !== undefined &&
+            message.streamId === activePlaceholder.streamId,
+        )
+          ? [activePlaceholder]
+          : []),
+      ]
+    : messages;
+  const hasMessages = displayMessages.length > 0;
+
   return (
     <Card className="flex h-full flex-col">
       <CardHeader>
@@ -122,7 +168,7 @@ export function ChatPanel() {
           <ScrollArea className="h-full pr-4">
             {hasMessages ? (
               <div className="flex flex-col gap-6 pb-4">
-                {messages.map((message) => (
+                {displayMessages.map((message) => (
                   <Message key={message.id} from={message.role}>
                     <MessageContent className="max-w-full">
                       {message.role === "assistant" ? (
