@@ -22,7 +22,6 @@ import {
   buildStructuredPrompt,
   createAssistantPlaceholder,
   createId,
-  createUserMessage,
   type ChatMessage,
 } from "@/lib/chat/chatUtils";
 import { AssistantStreamResponse } from "@/components/chat/AssistantStreamResponse";
@@ -30,10 +29,12 @@ import { ThemeUpdateTask } from "@/components/chat/ThemeUpdateTask";
 import type { ThemeUpdateSummary } from "@/lib/chat/themeUpdates";
 
 export function ChatPanel() {
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [prompt, setPrompt] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [threadId, setThreadId] = useState<Id<"threads"> | null>(null);
+  const [activeAssistant, setActiveAssistant] = useState<ChatMessage | null>(
+    null,
+  );
   const [activeAssistantId, setActiveAssistantId] = useState<string | null>(
     null,
   );
@@ -41,11 +42,16 @@ export function ChatPanel() {
     Record<string, ThemeUpdateSummary[]>
   >({});
   const sendMessage = useMutation(api.messages.sendMessage);
-  const history = useQuery(api.messages.getThreadMessages, threadId ? { threadId } : "skip");
+  const history = useQuery(
+    api.messages.getThreadMessages,
+    threadId ? { threadId } : "skip",
+  );
   const historyMessages = useMemo(() => {
     if (!history) return null;
     return history
-      .filter((message) => message.role === "user" || message.role === "assistant")
+      .filter(
+        (message) => message.role === "user" || message.role === "assistant",
+      )
       .map((message) => ({
         id: message._id,
         role: message.role as "user" | "assistant",
@@ -59,54 +65,38 @@ export function ChatPanel() {
     const trimmedPrompt = prompt.trim();
     if (!trimmedPrompt || isLoading) return;
 
-    const userMessage = createUserMessage(trimmedPrompt);
     const assistantId = createId();
-
-    setMessages((current) => [
-      ...current,
-      userMessage,
-      createAssistantPlaceholder(assistantId),
-    ]);
+    setActiveAssistant(createAssistantPlaceholder(assistantId));
     setPrompt("");
     setIsLoading(true);
 
     try {
       const structuredPrompt = buildStructuredPrompt(trimmedPrompt, config);
-      const { responseStreamId, threadId: returnedThreadId } = await sendMessage(
-        {
+      const { responseStreamId, threadId: returnedThreadId } =
+        await sendMessage({
           prompt: trimmedPrompt,
           structuredPrompt,
           threadId: threadId ?? undefined,
-        },
-      );
+        });
 
       if (!threadId) {
         setThreadId(returnedThreadId);
       }
 
-      setMessages((current) =>
-        current.map((message) =>
-          message.id === assistantId
-            ? { ...message, streamId: responseStreamId }
-            : message,
-        ),
-      );
+      setActiveAssistant({
+        ...createAssistantPlaceholder(assistantId),
+        streamId: responseStreamId,
+      });
       setActiveAssistantId(assistantId);
-    } catch {
-      setMessages((current) =>
-        current.map((message) =>
-          message.id === assistantId
-            ? {
-                ...message,
-                content:
-                  "We couldn't reach the AI service. Try again in a moment.",
-              }
-            : message,
-        ),
-      );
+    } catch (error) {
+      console.error("[ChatPanel] sendPrompt failed", error);
+      setActiveAssistant({
+        ...createAssistantPlaceholder(assistantId),
+        content: "We couldn't reach the AI service. Try again in a moment.",
+      });
       setIsLoading(false);
     }
-  }, [config, isLoading, prompt, sendMessage]);
+  }, [config, isLoading, prompt, sendMessage, threadId]);
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -130,13 +120,7 @@ export function ChatPanel() {
     [],
   );
 
-  const activePlaceholder = useMemo(
-    () =>
-      messages.find(
-        (message) => message.role === "assistant" && message.streamId !== undefined,
-      ),
-    [messages],
-  );
+  const activePlaceholder = activeAssistant;
 
   const displayMessages = historyMessages
     ? [
@@ -144,6 +128,7 @@ export function ChatPanel() {
         ...(activePlaceholder &&
         !historyMessages.some(
           (message) =>
+            message.role === "assistant" &&
             message.streamId !== undefined &&
             activePlaceholder.streamId !== undefined &&
             message.streamId === activePlaceholder.streamId,
@@ -151,7 +136,9 @@ export function ChatPanel() {
           ? [activePlaceholder]
           : []),
       ]
-    : messages;
+    : activePlaceholder
+      ? [activePlaceholder]
+      : [];
   const hasMessages = displayMessages.length > 0;
 
   return (
