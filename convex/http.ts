@@ -7,13 +7,39 @@ import { Webhook } from "svix";
 
 const http = httpRouter();
 
-// chat streaming endpoint
+const CORS_HEADERS = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type, Authorization",
+};
+
+const withCors = (response: Response) => {
+  Object.entries(CORS_HEADERS).forEach(([key, value]) => {
+    response.headers.set(key, value);
+  });
+  return response;
+};
+
+// chat streaming endpoint with CORS
 http.route({
   path: "/chat-stream",
   method: "POST",
   handler: httpAction(async (ctx, request) => {
-    return await streamChatHandler(ctx, request);
+    const response = await streamChatHandler(ctx, request);
+    return withCors(response);
   }),
+});
+
+http.route({
+  path: "/chat-stream",
+  method: "OPTIONS",
+  handler: httpAction(async () =>
+    withCors(
+      new Response(null, {
+        status: 204,
+      }),
+    ),
+  ),
 });
 
 // webhooks for clerk

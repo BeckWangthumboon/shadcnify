@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useStream } from "@convex-dev/persistent-text-streaming/react";
 import type { StreamId } from "@convex-dev/persistent-text-streaming";
 import { Loader2 } from "lucide-react";
@@ -11,6 +11,7 @@ import {
   extractThemeUpdatePayloads,
   type ThemeUpdateSummary,
 } from "@/lib/chat/themeUpdates";
+import { useAuth } from "@clerk/clerk-react";
 
 type AssistantStreamResponseProps = {
   streamId?: StreamId;
@@ -27,6 +28,15 @@ export function AssistantStreamResponse({
   onFinish,
   onThemeUpdate,
 }: AssistantStreamResponseProps) {
+  const { getToken } = useAuth();
+  const [authToken, setAuthToken] = useState<string | null>(null);
+
+  useEffect(() => {
+    void getToken({ template: "convex" }).then((token) => {
+      setAuthToken(token ?? null);
+    });
+  }, [getToken]);
+
   const convexSiteUrl = getConvexSiteUrl();
   const streamUrl = useMemo(
     () => new URL(`${convexSiteUrl}/chat-stream`),
@@ -37,6 +47,7 @@ export function AssistantStreamResponse({
     streamUrl,
     driven,
     streamId,
+    { authToken },
   );
   const { updateTokens } = useThemeConfig();
   const appliedToolCallIds = useRef<Set<string>>(new Set());
