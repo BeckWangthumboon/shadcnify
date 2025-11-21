@@ -20,11 +20,10 @@ async function assertUserAuthenticated(ctx: CommonCtx): Promise<Doc<"users">> {
     throw new Error("User not authenticated");
   }
 
+  // Prefer subject (Clerk user id) to match existing rows.
   const userRecord = await ctx.db
     .query("users")
-    .withIndex("by_externalId", (q) =>
-      q.eq("externalId", identity.tokenIdentifier),
-    )
+    .withIndex("by_externalId", (q) => q.eq("externalId", identity.subject))
     .unique();
 
   if (!userRecord) {
